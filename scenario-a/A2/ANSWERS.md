@@ -40,5 +40,7 @@ Answer :
     - I have attached the screenshot in "evidence/Scenarion-A-2 | Task-7.png"
 
 
+Task 8 - In my case i could not generate “timed out” and “connection refused” errors, but i have attached the screenshots in "evidence/Scenarion-A-2 | Task-8.png"
+
 
 
