@@ -1,0 +1,16 @@
+scenario-a/A2/useful-commands.md
+  h_2d5a554200463e 1-24
+scenario-a/A2/ANSWERS.md
+  h_2d5a554200463e 1-44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "a75ea4bc6625429ea064cdd448de48a20c18104b",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
