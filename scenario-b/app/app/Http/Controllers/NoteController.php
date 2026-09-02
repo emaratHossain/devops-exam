@@ -16,8 +16,6 @@ use Illuminate\Support\Facades\DB;
  */
 class NoteController extends Controller
 {
-    private const MAX_LIMIT = 100;
-
     /** POST /api/notes */
     public function store(Request $request): JsonResponse
     {
@@ -179,12 +177,11 @@ class NoteController extends Controller
         return (int) $request->attributes->get('tenant_id');
     }
 
-    /** @return array{0:int,1:int} page and limit, both inside safe bounds. */
+    /** @return array{0:int,1:int} page and limit taken from the query string. */
     private function pagination(Request $request): array
     {
         $page = max(1, (int) $request->query('page', 1));
-        $limit = (int) $request->query('limit', 20);
-        $limit = min(self::MAX_LIMIT, max(1, $limit));
+        $limit = max(1, (int) $request->query('limit', 20));
 
         return [$page, $limit];
     }

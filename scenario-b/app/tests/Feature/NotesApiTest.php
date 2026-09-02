@@ -104,6 +104,16 @@ class NotesApiTest extends TestCase
             ->assertJsonPath('meta.pages', 3);
     }
 
+    public function test_list_accepts_any_limit(): void
+    {
+        // There is no cap. The client can ask for as many rows as it wants.
+        Note::create(['tenant_id' => $this->acme->id, 'title' => 'one', 'body' => 'body']);
+
+        $this->getJson('/api/notes?limit=50000', $this->asTenant('acme'))
+            ->assertOk()
+            ->assertJsonPath('meta.limit', 50000);
+    }
+
     public function test_a_note_of_another_tenant_is_not_found(): void
     {
         $note = Note::create(['tenant_id' => $this->globex->id, 'title' => 'secret', 'body' => 'secret body']);

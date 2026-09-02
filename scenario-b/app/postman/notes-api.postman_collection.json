@@ -228,7 +228,7 @@
             {
               "key": "limit",
               "value": "20",
-              "description": "Rows per page. Highest allowed is 100."
+              "description": "Rows per page. There is no highest value."
             }
           ]
         },
