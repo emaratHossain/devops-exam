@@ -1,0 +1,14 @@
+scenario-b/app/routes/api.php
+  h_2d5a554200463e 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "8f4364b8fbb2282a6ee486bd515506190e8bd38b",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
