@@ -24,7 +24,7 @@ services:
       SESSION_DRIVER: file
       QUEUE_CONNECTION: sync
     ports:
-      - "8080:8080"
+      - "5151:8080"
     depends_on:
       db:
         condition: service_healthy
