@@ -1,0 +1,19 @@
+scenario-b/docker/Dockerfile.naive
+  s_fc74266b055973::t_deb504ab42f817 1-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "599f618bd633e72b5e7e5a26bb7b182a4304a13d",
+  "prompts": {},
+  "sessions": {
+    "s_fc74266b055973": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eef252e3-49ca-4371-b4dc-00882efbf872",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
