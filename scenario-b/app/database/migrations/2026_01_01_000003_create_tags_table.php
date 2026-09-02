@@ -12,8 +12,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('note_id')->constrained('notes');
             $table->text('name');
-
-            $table->index('note_id');
         });
     }
 
