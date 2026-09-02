@@ -1,0 +1,45 @@
+# Dockerfile.naive — the "before" image for Task 22.
+#
+# This is on purpose a bad Dockerfile. One stage only.
+# Everything used to build the app stays inside the final image.
+# It is kept next to docker/Dockerfile so both images use the same
+# build context (scenario-b/) and the same source code. That makes the
+# size comparison fair.
+#
+#   docker build -f docker/Dockerfile.naive -t notes-api:naive .
+#   docker build -f docker/Dockerfile        -t notes-api:multistage .
+#   docker images notes-api
+
+# Full Debian PHP image, not the small Alpine one.
+FROM php:8.3-cli
+
+# Build tools, git, unzip and the Postgres headers.
+# All of these are only needed to build. They stay in the image.
+RUN apt-get update && apt-get install -y \
+      git \
+      unzip \
+      zip \
+      curl \
+      build-essential \
+      libpq-dev \
+      libzip-dev \
+      libonig-dev \
+      libxml2-dev \
+ && docker-php-ext-install pdo_pgsql zip
+
+# Composer is installed into the image itself.
+COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+# Copy the whole app, including tests and dev files.
+COPY app/ ./
+
+# Install every dependency, including the dev ones (phpunit, faker, ...).
+RUN composer install --optimize-autoloader --no-interaction --no-progress
+
+# No user is created, so the container runs as root.
+
+EXPOSE 8080
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
