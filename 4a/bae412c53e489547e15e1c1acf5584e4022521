@@ -1,0 +1,34 @@
+scenario-b/ANSWERS.md
+  h_2d5a554200463e 1
+scenario-b/docker/docker-compose.yml
+  s_7cae5f680a7aac::t_a0ca16c4e01b2e 17-18,32,51-81,85-86
+  h_2d5a554200463e 29-30,45-49
+  h_2d5a554200463e 50
+scenario-b/grafana/provisioning/datasources/prometheus.yml
+  s_7cae5f680a7aac::t_e45ff9195b31f1 1-9
+scenario-b/docker/.env.example
+  s_7cae5f680a7aac::t_a0ca16c4e01b2e 8-9
+scenario-b/docker/prometheus/prometheus.yml
+  s_7cae5f680a7aac::t_e45ff9195b31f1 1-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "4abae412c53e489547e15e1c1acf5584e4022521",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_7cae5f680a7aac": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "99075819-7cbf-4ad0-b4c7-de87621255bf",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
