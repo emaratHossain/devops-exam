@@ -6,6 +6,7 @@ use App\Models\Note;
 use App\Models\Tag;
 use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class NotesApiTest extends TestCase
@@ -49,15 +50,42 @@ class NotesApiTest extends TestCase
 
     public function test_list_shows_only_notes_of_the_calling_tenant(): void
     {
-        Note::create(['tenant_id' => $this->acme->id, 'title' => 'acme note', 'body' => 'acme body']);
+        $mine = Note::create(['tenant_id' => $this->acme->id, 'title' => 'acme note', 'body' => 'acme body']);
         Note::create(['tenant_id' => $this->globex->id, 'title' => 'globex note', 'body' => 'globex body']);
+        Tag::create(['note_id' => $mine->id, 'name' => 'work']);
 
         $response = $this->getJson('/api/notes', $this->asTenant('acme'));
 
         $response->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.title', 'acme note')
+            ->assertJsonPath('data.0.tags', ['work'])
             ->assertJsonPath('meta.total', 1);
+    }
+
+    public function test_list_runs_one_tag_query_for_every_note(): void
+    {
+        // This test writes down how the endpoint behaves today.
+        // It asks the database once for the notes, then once more for each
+        // note's tags. That is the N+1 problem. When the endpoint is fixed,
+        // this test must be changed to expect 1 tag query.
+        for ($i = 1; $i <= 3; $i++) {
+            $note = Note::create(['tenant_id' => $this->acme->id, 'title' => "note {$i}", 'body' => 'body']);
+            Tag::create(['note_id' => $note->id, 'name' => 'work']);
+        }
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $this->getJson('/api/notes?limit=3', $this->asTenant('acme'))->assertOk();
+
+        $tagQueries = collect(DB::getQueryLog())
+            ->filter(fn (array $entry) => str_contains($entry['query'], 'from "tags"'))
+            ->count();
+
+        DB::disableQueryLog();
+
+        $this->assertSame(3, $tagQueries, 'The list endpoint runs one tags query per note (N+1).');
     }
 
     public function test_list_respects_page_and_limit(): void

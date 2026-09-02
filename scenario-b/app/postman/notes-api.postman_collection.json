@@ -57,19 +57,36 @@
       "request": {
         "method": "POST",
         "header": [
-          { "key": "X-Tenant", "value": "{{tenant}}" },
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Accept", "value": "application/json" }
+          {
+            "key": "X-Tenant",
+            "value": "{{tenant}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
         ],
         "body": {
           "mode": "raw",
           "raw": "{\n  \"title\": \"Exam note\",\n  \"body\": \"this body mentions rocket and harbor\",\n  \"tags\": [\"work\", \"urgent\"]\n}",
-          "options": { "raw": { "language": "json" } }
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
         },
         "url": {
           "raw": "{{base_url}}/notes",
-          "host": ["{{base_url}}"],
-          "path": ["notes"]
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "notes"
+          ]
         },
         "description": "Makes one note for the tenant in the X-Tenant header.\n\nFields:\n- `title` - required, text, max 255\n- `body` - required, text\n- `tags` - optional, list of text, max 20 items\n\nReturns 201 and the new note. Returns 422 if a field is wrong."
       },
@@ -79,19 +96,38 @@
           "originalRequest": {
             "method": "POST",
             "header": [
-              { "key": "X-Tenant", "value": "acme" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "X-Tenant",
+                "value": "acme"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Exam note\",\n  \"body\": \"this body mentions rocket and harbor\",\n  \"tags\": [\"work\", \"urgent\"]\n}"
             },
-            "url": { "raw": "{{base_url}}/notes", "host": ["{{base_url}}"], "path": ["notes"] }
+            "url": {
+              "raw": "{{base_url}}/notes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notes"
+              ]
+            }
           },
           "status": "Created",
           "code": 201,
           "_postman_previewlanguage": "json",
-          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\n    \"data\": {\n        \"id\": 50001,\n        \"tenant_id\": 1,\n        \"title\": \"Exam note\",\n        \"body\": \"this body mentions rocket and harbor\",\n        \"created_at\": \"2026-09-02T00:08:01.000000Z\",\n        \"tags\": [\n            \"work\",\n            \"urgent\"\n        ]\n    }\n}"
         },
         {
@@ -99,16 +135,38 @@
           "originalRequest": {
             "method": "POST",
             "header": [
-              { "key": "X-Tenant", "value": "acme" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "X-Tenant",
+                "value": "acme"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "body": { "mode": "raw", "raw": "{\n  \"body\": \"no title here\"\n}" },
-            "url": { "raw": "{{base_url}}/notes", "host": ["{{base_url}}"], "path": ["notes"] }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"no title here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/notes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notes"
+              ]
+            }
           },
           "status": "Unprocessable Content",
           "code": 422,
           "_postman_previewlanguage": "json",
-          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\n    \"message\": \"The title field is required.\",\n    \"errors\": {\n        \"title\": [\n            \"The title field is required.\"\n        ]\n    }\n}"
         }
       ]
@@ -130,6 +188,12 @@
               "    var ids = body.data.map(function (n) { return n.tenant_id; });",
               "    var unique = ids.filter(function (v, i, a) { return a.indexOf(v) === i; });",
               "    pm.expect(unique.length).to.be.below(2);",
+              "});",
+              "",
+              "pm.test('every note carries its tags', function () {",
+              "    pm.response.json().data.forEach(function (n) {",
+              "        pm.expect(n.tags).to.be.an('array');",
+              "    });",
               "});"
             ]
           }
@@ -138,41 +202,79 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "X-Tenant", "value": "{{tenant}}" },
-          { "key": "Accept", "value": "application/json" }
+          {
+            "key": "X-Tenant",
+            "value": "{{tenant}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
         ],
         "url": {
           "raw": "{{base_url}}/notes?page=1&limit=20",
-          "host": ["{{base_url}}"],
-          "path": ["notes"],
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "notes"
+          ],
           "query": [
-            { "key": "page", "value": "1", "description": "Page number. Starts at 1." },
-            { "key": "limit", "value": "20", "description": "Rows per page. Highest allowed is 100." }
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Page number. Starts at 1."
+            },
+            {
+              "key": "limit",
+              "value": "20",
+              "description": "Rows per page. Highest allowed is 100."
+            }
           ]
         },
-        "description": "Lists the notes of the calling tenant, newest first.\n\n`meta.total` is the number of notes this tenant has.\nFor tenant `acme` that is about 30,000."
+        "description": "Lists the notes of the calling tenant, newest first. Each note also carries its tags.\n\n`meta.total` is the number of notes this tenant has. For tenant `acme` that is about 30,000."
       },
       "response": [
         {
           "name": "200 OK",
           "originalRequest": {
             "method": "GET",
-            "header": [{ "key": "X-Tenant", "value": "acme" }],
+            "header": [
+              {
+                "key": "X-Tenant",
+                "value": "acme"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/notes?page=1&limit=2",
-              "host": ["{{base_url}}"],
-              "path": ["notes"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notes"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "2" }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "2"
+                }
               ]
             }
           },
           "status": "OK",
           "code": 200,
           "_postman_previewlanguage": "json",
-          "header": [{ "key": "Content-Type", "value": "application/json" }],
-          "body": "{\n    \"data\": [\n        {\n            \"id\": 50001,\n            \"tenant_id\": 1,\n            \"title\": \"Exam note\",\n            \"body\": \"this body mentions rocket and harbor\",\n            \"created_at\": \"2026-09-02 00:08:01\"\n        },\n        {\n            \"id\": 30000,\n            \"tenant_id\": 1,\n            \"title\": \"Ocean sandal lantern\",\n            \"body\": \"cellar letter vision eagle corner system salmon diesel zebra copper marble ground crystal watch dinner yellow tower ground coffee valley email tissue gather printer pepper nectar vision needle driver diesel watch meteor earth steady eagle corner system violet fabric market dagger travel wheel rubber tomato.\",\n            \"created_at\": \"2025-10-11 03:21:17\"\n        }\n    ],\n    \"meta\": {\n        \"page\": 1,\n        \"limit\": 2,\n        \"total\": 30001,\n        \"pages\": 15001\n    }\n}"
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n    \"data\": [\n        {\n            \"id\": 50001,\n            \"tenant_id\": 1,\n            \"title\": \"Exam note\",\n            \"body\": \"this body mentions rocket and harbor\",\n            \"created_at\": \"2026-09-02 00:08:01\",\n            \"tags\": [\n                \"work\",\n                \"urgent\"\n            ]\n        },\n        {\n            \"id\": 30000,\n            \"tenant_id\": 1,\n            \"title\": \"Ocean sandal lantern\",\n            \"body\": \"cellar letter vision eagle corner system salmon diesel zebra copper marble ground crystal watch dinner yellow tower ground coffee valley email tissue gather printer pepper nectar vision needle driver diesel watch meteor earth steady eagle corner system violet fabric market dagger travel wheel rubber tomato.\",\n            \"created_at\": \"2025-10-11 03:21:17\",\n            \"tags\": [\n                \"todo\",\n                \"review\",\n                \"work\"\n            ]\n        }\n    ],\n    \"meta\": {\n        \"page\": 1,\n        \"limit\": 2,\n        \"total\": 30001,\n        \"pages\": 15001\n    }\n}"
         }
       ]
     },
@@ -198,13 +300,24 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "X-Tenant", "value": "{{tenant}}" },
-          { "key": "Accept", "value": "application/json" }
+          {
+            "key": "X-Tenant",
+            "value": "{{tenant}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
         ],
         "url": {
           "raw": "{{base_url}}/notes/{{note_id}}",
-          "host": ["{{base_url}}"],
-          "path": ["notes", "{{note_id}}"]
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "notes",
+            "{{note_id}}"
+          ]
         },
         "description": "Reads one note and its tags.\n\n`note_id` is set for you when you run 'Create a note'.\n\nIf the note belongs to another tenant, the answer is 404. It looks like the note does not exist."
       },
@@ -213,26 +326,64 @@
           "name": "200 OK",
           "originalRequest": {
             "method": "GET",
-            "header": [{ "key": "X-Tenant", "value": "acme" }],
-            "url": { "raw": "{{base_url}}/notes/50001", "host": ["{{base_url}}"], "path": ["notes", "50001"] }
+            "header": [
+              {
+                "key": "X-Tenant",
+                "value": "acme"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notes/50001",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notes",
+                "50001"
+              ]
+            }
           },
           "status": "OK",
           "code": 200,
           "_postman_previewlanguage": "json",
-          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\n    \"data\": {\n        \"id\": 50001,\n        \"tenant_id\": 1,\n        \"title\": \"Exam note\",\n        \"body\": \"this body mentions rocket and harbor\",\n        \"created_at\": \"2026-09-02 00:08:01\",\n        \"tags\": [\n            \"work\",\n            \"urgent\"\n        ]\n    }\n}"
         },
         {
           "name": "404 Not found",
           "originalRequest": {
             "method": "GET",
-            "header": [{ "key": "X-Tenant", "value": "acme" }],
-            "url": { "raw": "{{base_url}}/notes/999999999", "host": ["{{base_url}}"], "path": ["notes", "999999999"] }
+            "header": [
+              {
+                "key": "X-Tenant",
+                "value": "acme"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notes/999999999",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notes",
+                "999999999"
+              ]
+            }
           },
           "status": "Not Found",
           "code": 404,
           "_postman_previewlanguage": "json",
-          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\n    \"message\": \"Note not found.\"\n}"
         }
       ]
@@ -263,17 +414,37 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "X-Tenant", "value": "{{tenant}}" },
-          { "key": "Accept", "value": "application/json" }
+          {
+            "key": "X-Tenant",
+            "value": "{{tenant}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
         ],
         "url": {
           "raw": "{{base_url}}/search?q=rocket&page=1&limit=20",
-          "host": ["{{base_url}}"],
-          "path": ["search"],
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "search"
+          ],
           "query": [
-            { "key": "q", "value": "rocket", "description": "The word to look for inside the note body. Required." },
-            { "key": "page", "value": "1" },
-            { "key": "limit", "value": "20" }
+            {
+              "key": "q",
+              "value": "rocket",
+              "description": "The word to look for inside the note body. Required."
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            }
           ]
         },
         "description": "Looks for a word inside the note body, for this tenant only.\n\nThe query is `body ILIKE '%word%'`. No index can help that, so it reads the whole table. On 30,000 notes it is slow. That is on purpose.\n\nWords you can try: rocket, harbor, winter, zebra, quartz."
@@ -283,34 +454,72 @@
           "name": "200 OK",
           "originalRequest": {
             "method": "GET",
-            "header": [{ "key": "X-Tenant", "value": "acme" }],
+            "header": [
+              {
+                "key": "X-Tenant",
+                "value": "acme"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/search?q=rocket&limit=1",
-              "host": ["{{base_url}}"],
-              "path": ["search"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "search"
+              ],
               "query": [
-                { "key": "q", "value": "rocket" },
-                { "key": "limit", "value": "1" }
+                {
+                  "key": "q",
+                  "value": "rocket"
+                },
+                {
+                  "key": "limit",
+                  "value": "1"
+                }
               ]
             }
           },
           "status": "OK",
           "code": 200,
           "_postman_previewlanguage": "json",
-          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\n    \"data\": [\n        {\n            \"id\": 50001,\n            \"tenant_id\": 1,\n            \"title\": \"Exam note\",\n            \"body\": \"this body mentions rocket and harbor\",\n            \"created_at\": \"2026-09-02 00:08:01\"\n        }\n    ],\n    \"meta\": {\n        \"page\": 1,\n        \"limit\": 1,\n        \"total\": 4771,\n        \"pages\": 4771,\n        \"q\": \"rocket\"\n    }\n}"
         },
         {
           "name": "422 Missing q",
           "originalRequest": {
             "method": "GET",
-            "header": [{ "key": "X-Tenant", "value": "acme" }],
-            "url": { "raw": "{{base_url}}/search", "host": ["{{base_url}}"], "path": ["search"] }
+            "header": [
+              {
+                "key": "X-Tenant",
+                "value": "acme"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/search",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "search"
+              ]
+            }
           },
           "status": "Unprocessable Content",
           "code": 422,
           "_postman_previewlanguage": "json",
-          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\n    \"message\": \"The q field is required.\",\n    \"errors\": {\n        \"q\": [\n            \"The q field is required.\"\n        ]\n    }\n}"
         }
       ]
@@ -338,13 +547,23 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "X-Tenant", "value": "{{tenant}}" },
-          { "key": "Accept", "value": "application/json" }
+          {
+            "key": "X-Tenant",
+            "value": "{{tenant}}"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
         ],
         "url": {
           "raw": "{{base_url}}/stats",
-          "host": ["{{base_url}}"],
-          "path": ["stats"]
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "stats"
+          ]
         },
         "description": "Counts for the calling tenant. The query joins all three tables: tenants, notes, tags.\n\nIt returns only the calling tenant, not all five. Showing other tenants' counts would break tenant isolation.\n\nChange the `tenant` variable to see another tenant:\n\n| tenant | notes | tags |\n|---|---|---|\n| acme | 30,000 | about 89,500 |\n| globex | 8,000 | about 24,200 |\n| initech | 6,000 | about 18,200 |\n| umbrella | 4,000 | about 12,200 |\n| hooli | 2,000 | about 5,900 |"
       },
@@ -353,13 +572,31 @@
           "name": "200 OK",
           "originalRequest": {
             "method": "GET",
-            "header": [{ "key": "X-Tenant", "value": "acme" }],
-            "url": { "raw": "{{base_url}}/stats", "host": ["{{base_url}}"], "path": ["stats"] }
+            "header": [
+              {
+                "key": "X-Tenant",
+                "value": "acme"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats"
+              ]
+            }
           },
           "status": "OK",
           "code": 200,
           "_postman_previewlanguage": "json",
-          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "body": "{\n    \"data\": {\n        \"tenant_id\": 1,\n        \"tenant_slug\": \"acme\",\n        \"notes_count\": 30001,\n        \"tags_count\": 89511\n    }\n}"
         }
       ]
@@ -386,13 +623,24 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "X-Tenant", "value": "{{other_tenant}}" },
-              { "key": "Accept", "value": "application/json" }
+              {
+                "key": "X-Tenant",
+                "value": "{{other_tenant}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/notes/{{note_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["notes", "{{note_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notes",
+                "{{note_id}}"
+              ]
             },
             "description": "Same note id, but a different tenant in the header.\n\nRun 'Create a note' first. The note is made for `acme`. This request asks for it as `hooli`. The answer must be 404."
           },
@@ -401,13 +649,32 @@
               "name": "404 Not found",
               "originalRequest": {
                 "method": "GET",
-                "header": [{ "key": "X-Tenant", "value": "hooli" }],
-                "url": { "raw": "{{base_url}}/notes/50001", "host": ["{{base_url}}"], "path": ["notes", "50001"] }
+                "header": [
+                  {
+                    "key": "X-Tenant",
+                    "value": "hooli"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/notes/50001",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "notes",
+                    "50001"
+                  ]
+                }
               },
               "status": "Not Found",
               "code": 404,
               "_postman_previewlanguage": "json",
-              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
               "body": "{\n    \"message\": \"Note not found.\"\n}"
             }
           ]
@@ -429,11 +696,20 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "Accept", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/notes",
-              "host": ["{{base_url}}"],
-              "path": ["notes"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notes"
+              ]
             },
             "description": "No tenant header at all. The API refuses the call."
           },
@@ -443,12 +719,25 @@
               "originalRequest": {
                 "method": "GET",
                 "header": [],
-                "url": { "raw": "{{base_url}}/notes", "host": ["{{base_url}}"], "path": ["notes"] }
+                "url": {
+                  "raw": "{{base_url}}/notes",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "notes"
+                  ]
+                }
               },
               "status": "Bad Request",
               "code": 400,
               "_postman_previewlanguage": "json",
-              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
               "body": "{\n    \"message\": \"The X-Tenant header is required.\"\n}"
             }
           ]
@@ -471,13 +760,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "X-Tenant", "value": "nosuch" },
-              { "key": "Accept", "value": "application/json" }
+              {
+                "key": "X-Tenant",
+                "value": "nosuch"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/notes",
-              "host": ["{{base_url}}"],
-              "path": ["notes"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notes"
+              ]
             },
             "description": "A tenant slug that is not in the tenants table."
           },
@@ -486,13 +785,31 @@
               "name": "404 Unknown tenant",
               "originalRequest": {
                 "method": "GET",
-                "header": [{ "key": "X-Tenant", "value": "nosuch" }],
-                "url": { "raw": "{{base_url}}/notes", "host": ["{{base_url}}"], "path": ["notes"] }
+                "header": [
+                  {
+                    "key": "X-Tenant",
+                    "value": "nosuch"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/notes",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "notes"
+                  ]
+                }
               },
               "status": "Not Found",
               "code": 404,
               "_postman_previewlanguage": "json",
-              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
               "body": "{\n    \"message\": \"Unknown tenant [nosuch].\"\n}"
             }
           ]
@@ -519,13 +836,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "X-Tenant", "value": "{{other_tenant}}" },
-              { "key": "Accept", "value": "application/json" }
+              {
+                "key": "X-Tenant",
+                "value": "{{other_tenant}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
             ],
             "url": {
               "raw": "{{base_url}}/stats",
-              "host": ["{{base_url}}"],
-              "path": ["stats"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats"
+              ]
             },
             "description": "Same endpoint, different tenant. The numbers must be different."
           },
@@ -534,13 +861,31 @@
               "name": "200 OK",
               "originalRequest": {
                 "method": "GET",
-                "header": [{ "key": "X-Tenant", "value": "hooli" }],
-                "url": { "raw": "{{base_url}}/stats", "host": ["{{base_url}}"], "path": ["stats"] }
+                "header": [
+                  {
+                    "key": "X-Tenant",
+                    "value": "hooli"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/stats",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "stats"
+                  ]
+                }
               },
               "status": "OK",
               "code": 200,
               "_postman_previewlanguage": "json",
-              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
               "body": "{\n    \"data\": {\n        \"tenant_id\": 5,\n        \"tenant_slug\": \"hooli\",\n        \"notes_count\": 2000,\n        \"tags_count\": 5931\n    }\n}"
             }
           ]

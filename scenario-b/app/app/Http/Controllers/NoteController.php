@@ -74,6 +74,14 @@ class NoteController extends Controller
             ->limit($limit)
             ->get(['id', 'tenant_id', 'title', 'body', 'created_at']);
 
+        // Add the tags to every note.
+        foreach ($rows as $note) {
+            $note->tags = DB::table('tags')
+                ->where('note_id', $note->id)
+                ->orderBy('id')
+                ->pluck('name');
+        }
+
         return response()->json([
             'data' => $rows,
             'meta' => $this->meta($page, $limit, $total),
