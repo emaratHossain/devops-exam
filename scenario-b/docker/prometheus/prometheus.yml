@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Prometheus scrapes itself. This always works, so it proves the setup is alive.
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # The Laravel app. This target stays DOWN until the app serves /metrics.
+  - job_name: notes-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["app:8080"]

@@ -14,8 +14,8 @@ services:
       APP_URL: ${APP_URL:-http://localhost:8080}
       LOG_CHANNEL: stderr
       DB_CONNECTION: pgsql
-      # "db" is the service name below. Inside the compose network that is the hostname.
-      DB_HOST: db
+      # "postgres" is the service name below. Inside the compose network that is the hostname.
+      DB_HOST: postgres
       DB_PORT: 5432
       DB_DATABASE: ${POSTGRES_DB:-notes}
       DB_USERNAME: ${POSTGRES_USER:-notes}
@@ -26,10 +26,10 @@ services:
     ports:
       - "5151:8080"
     depends_on:
-      db:
-        condition: service_healthy
+      - postgres
+        # condition: service_healthy
 
-  db:
+  postgres:
     image: postgres:16
     container_name: notes-db
     restart: unless-stopped
@@ -42,11 +42,45 @@ services:
       - "5432"
     volumes:
       - notes-db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-notes} -d ${POSTGRES_DB:-notes}"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-notes} -d ${POSTGRES_DB:-notes}"]
+    #   interval: 5s
+    #   timeout: 3s
+    #   retries: 10
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: notes-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    container_name: notes-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      # No sign-up page. Only the admin user above can log in.
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      # This file tells Grafana to use Prometheus as the data source.
+      - ../grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
 
 volumes:
   notes-db-data:
+  prometheus-data:
+  grafana-data:
