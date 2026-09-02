@@ -1,5 +1,6 @@
 <?php
 
+//Test CACHE
 use App\Http\Controllers\NoteController;
 use Illuminate\Support\Facades\Route;
 
