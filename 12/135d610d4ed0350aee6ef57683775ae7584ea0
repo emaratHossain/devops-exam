@@ -1,0 +1,23 @@
+scenario-b/app/app/Http/Controllers/NoteController.php
+  s_47e830787f75ce::t_cf044e5c2ea0c7 180,184
+scenario-b/app/postman/notes-api.postman_collection.json
+  s_47e830787f75ce::t_58d391bc9b0aa7 231
+scenario-b/app/tests/Feature/NotesApiTest.php
+  s_47e830787f75ce::t_58d391bc9b0aa7 107-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "12135d610d4ed0350aee6ef57683775ae7584ea0",
+  "prompts": {},
+  "sessions": {
+    "s_47e830787f75ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f76324a9-79fb-40e8-acce-6db62ce3fd55",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
