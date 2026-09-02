@@ -1,0 +1,24 @@
+scenario-b/app/tests/Feature/NotesApiTest.php
+  s_47e830787f75ce::t_a5c47d4dfd95c6 9,53,55,62,66-88
+  s_47e830787f75ce::t_aa768e8bcfa092 89-90
+scenario-b/app/postman/notes-api.postman_collection.json
+  s_47e830787f75ce::t_ceb803205050f4 60-71,76-80,84-89,99-106,112-120,125-130,138-145,147-159,164-169,191-196,205-212,216-221,223-232,235,242-247,250-255,257-264,271-277,303-310,314-320,329-344,349-354,361-376,381-386,417-424,428-433,435-447,457-462,465-470,472-479,486-491,498-512,517-522,550-557,561-566,575-589,594-599,626-633,637-643,652-667,672-677,699-704,707-712,722-730,735-740,763-770,774-779,788-802,807-812,839-846,850-855,864-878,883-888
+scenario-b/app/app/Http/Controllers/NoteController.php
+  s_47e830787f75ce::t_b794d9683c6704 77-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "8f4abf89a06356fdb2ad87c5047b124356506b1b",
+  "prompts": {},
+  "sessions": {
+    "s_47e830787f75ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f76324a9-79fb-40e8-acce-6db62ce3fd55",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
