@@ -1,0 +1,139 @@
+scenario-b/app/database/migrations/2026_01_01_000002_create_notes_table.php
+  s_47e830787f75ce::t_f6df90c009ff87 1-27
+scenario-b/app/app/Models/Note.php
+  s_47e830787f75ce::t_f6df90c009ff87 1-17
+scenario-b/app/app/Http/Middleware/ResolveTenant.php
+  s_47e830787f75ce::t_f6df90c009ff87 1-39
+scenario-b/app/app/Models/Tag.php
+  s_47e830787f75ce::t_f6df90c009ff87 1-16
+scenario-b/app/app/Models/Tenant.php
+  s_47e830787f75ce::t_f6df90c009ff87 1-16
+scenario-b/app/tests/Feature/NotesApiTest.php
+  s_47e830787f75ce::t_ec98392d30ea85 1-137
+scenario-b/app/database/migrations/2026_01_01_000001_create_tenants_table.php
+  s_47e830787f75ce::t_f6df90c009ff87 1-21
+scenario-b/app/database/migrations/2026_01_01_000003_create_tags_table.php
+  s_47e830787f75ce::t_f6df90c009ff87 1-24
+scenario-b/app/postman/notes-api.postman_collection.json
+  s_47e830787f75ce::t_b4d540f8b23e22 1-551
+scenario-b/app/routes/api.php
+  s_47e830787f75ce::t_7af99660c32517 1-13
+scenario-b/app/.env.example
+  s_47e830787f75ce::t_26937d643eb810 1-65
+scenario-b/app/database/seeders/DatabaseSeeder.php
+  s_47e830787f75ce::t_002effa31cc3bc 1-186
+scenario-b/app/app/Http/Controllers/NoteController.php
+  s_47e830787f75ce::t_7af99660c32517 1-194
+scenario-b/app/bootstrap/app.php
+  s_47e830787f75ce::t_7af99660c32517 1-21
+scenario-b/docker/docker-compose.yml
+  s_47e830787f75ce::t_a1601c5dbc1953 1-21
+scenario-b/app/.editorconfig
+  s_47e830787f75ce::t_671bb75726a005 1-18
+scenario-b/app/.gitattributes
+  s_47e830787f75ce::t_4ef89de4f2e012 1-11
+scenario-b/app/.gitignore
+  s_47e830787f75ce::t_64052d93589e46 1-24
+scenario-b/app/README.md
+  s_47e830787f75ce::t_811312bba430a2 1-59
+scenario-b/app/app/Http/Controllers/Controller.php
+  s_47e830787f75ce::t_beb67c570adb33 1-8
+scenario-b/app/app/Providers/AppServiceProvider.php
+  s_47e830787f75ce::t_e3a3982b4801ea 1-24
+scenario-b/app/artisan
+  s_47e830787f75ce::t_da7213f762967c 1-18
+scenario-b/app/bootstrap/cache/.gitignore
+  s_47e830787f75ce::t_cf2c2e58218b48 1-2
+scenario-b/app/bootstrap/providers.php
+  s_47e830787f75ce::t_7a956afda57f2e 1-7
+scenario-b/app/composer.json
+  s_47e830787f75ce::t_d09cfb2c17a80e 1-86
+scenario-b/app/composer.lock
+  s_47e830787f75ce::t_cec33db0ec259d 1-8400
+scenario-b/app/config/app.php
+  s_47e830787f75ce::t_75906512e11d8d 1-126
+scenario-b/app/config/auth.php
+  s_47e830787f75ce::t_7f90985aab1757 1-117
+scenario-b/app/config/cache.php
+  s_47e830787f75ce::t_4a45e688139d3b 1-117
+scenario-b/app/config/database.php
+  s_47e830787f75ce::t_803bb71ecae711 1-184
+scenario-b/app/config/filesystems.php
+  s_47e830787f75ce::t_545940c719d8c5 1-80
+scenario-b/app/config/logging.php
+  s_47e830787f75ce::t_4465546a592894 1-132
+scenario-b/app/config/mail.php
+  s_47e830787f75ce::t_5abbf0dca0b554 1-118
+scenario-b/app/config/queue.php
+  s_47e830787f75ce::t_a118aa11da666b 1-129
+scenario-b/app/config/services.php
+  s_47e830787f75ce::t_795d94ae6d9001 1-38
+scenario-b/app/config/session.php
+  s_47e830787f75ce::t_8424f35e306bc7 1-217
+scenario-b/app/database/.gitignore
+  s_47e830787f75ce::t_a65032942537fb 1
+scenario-b/app/package.json
+  s_47e830787f75ce::t_d9adc91f25ae11 1-17
+scenario-b/app/phpunit.xml
+  s_47e830787f75ce::t_29799fc81575a5 1-36
+scenario-b/app/public/.htaccess
+  s_47e830787f75ce::t_8192fd465e6607 1-25
+scenario-b/app/public/index.php
+  s_47e830787f75ce::t_92599a0336e843 1-20
+scenario-b/app/public/robots.txt
+  s_47e830787f75ce::t_19a9e0e78d964e 1-2
+scenario-b/app/resources/css/app.css
+  s_47e830787f75ce::t_698ce96c6a4658 1-11
+scenario-b/app/resources/js/app.js
+  s_47e830787f75ce::t_de61e7130770f6 1
+scenario-b/app/resources/js/bootstrap.js
+  s_47e830787f75ce::t_146e14440a8530 1-4
+scenario-b/app/resources/views/welcome.blade.php
+  s_47e830787f75ce::t_d6db461d352d24 1-277
+scenario-b/app/routes/console.php
+  s_47e830787f75ce::t_a8247616cda394 1-8
+scenario-b/app/routes/web.php
+  s_47e830787f75ce::t_ab4fdcc0324b79 1-7
+scenario-b/app/storage/app/.gitignore
+  s_47e830787f75ce::t_0ff8e8f4a57c37 1-4
+scenario-b/app/storage/app/private/.gitignore
+  s_47e830787f75ce::t_1196bf9e674042 1-2
+scenario-b/app/storage/app/public/.gitignore
+  s_47e830787f75ce::t_079d5fb717262d 1-2
+scenario-b/app/storage/framework/.gitignore
+  s_47e830787f75ce::t_73cb6edf392c53 1-9
+scenario-b/app/storage/framework/cache/.gitignore
+  s_47e830787f75ce::t_6e207d6697566c 1-3
+scenario-b/app/storage/framework/cache/data/.gitignore
+  s_47e830787f75ce::t_603392f2addd12 1-2
+scenario-b/app/storage/framework/sessions/.gitignore
+  s_47e830787f75ce::t_28ca009bcf56a6 1-2
+scenario-b/app/storage/framework/testing/.gitignore
+  s_47e830787f75ce::t_6d93820e93d1b2 1-2
+scenario-b/app/storage/framework/views/.gitignore
+  s_47e830787f75ce::t_a75c0d0f0f9f05 1-2
+scenario-b/app/storage/logs/.gitignore
+  s_47e830787f75ce::t_0bc37bd49932d5 1-2
+scenario-b/app/tests/TestCase.php
+  s_47e830787f75ce::t_1cbdc088ef3270 1-10
+scenario-b/app/tests/Unit/ExampleTest.php
+  s_47e830787f75ce::t_6835423d0417e8 1-16
+scenario-b/app/vite.config.js
+  s_47e830787f75ce::t_a02ba94fe34e67 1-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "1903c22b49795758bead0e3c4f79ee537b462c7f",
+  "prompts": {},
+  "sessions": {
+    "s_47e830787f75ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f76324a9-79fb-40e8-acce-6db62ce3fd55",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
