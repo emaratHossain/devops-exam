@@ -17,3 +17,9 @@ I just have copied the necessary files from the builder stage to the final stage
 - And also copied the application code & vendor directory from the builder stage to the final stage.
 - Everything else is removed from the final stage.
 - I have attached the screenshots of the image sizes in the `evidence` directory.
+
+Task 22
+
+Question 1 - Why after changing anything in the code, the build time is increased?
+
+Answer 1 - Docker build images in layers and each layer is cached. When we change anything in the code, the layers after the changed layer are re-built, which increases the build time. In my case i changed app/routes.php file, so after COPY app/ ./, all the layers after that are re-built, which increases the build time.
