@@ -1,0 +1,14 @@
+scenario-b/docker/docker-compose.yml
+  h_2d5a554200463e 63,79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "d977080cb8eb73386aa35d1d73634eb3d8262c9a",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
