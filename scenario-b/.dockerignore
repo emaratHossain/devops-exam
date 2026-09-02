@@ -1,0 +1,15 @@
+**/.git
+**/.github
+**/node_modules
+**/vendor
+app/.env
+app/.env.*
+app/storage/logs/*
+app/storage/framework/cache/data/*
+app/storage/framework/sessions/*
+app/storage/framework/views/*
+app/public/build
+app/.phpunit.result.cache
+evidence
+grafana
+*.md

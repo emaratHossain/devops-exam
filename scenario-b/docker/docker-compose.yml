@@ -1,18 +1,49 @@
 services:
+  app:
+    build:
+      # Context is scenario-b/ because the Dockerfile does "COPY app/ ./".
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: notes-api:latest
+    container_name: notes-api
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY}
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: pgsql
+      # "db" is the service name below. Inside the compose network that is the hostname.
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-notes}
+      DB_USERNAME: ${POSTGRES_USER:-notes}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-notes}
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      QUEUE_CONNECTION: sync
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
     image: postgres:16
     container_name: notes-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: notes
-      POSTGRES_USER: notes
-      POSTGRES_PASSWORD: notes
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${POSTGRES_DB:-notes}
+      POSTGRES_USER: ${POSTGRES_USER:-notes}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-notes}
+    # Not published to the internet. Only the app container talks to it.
+    expose:
+      - "5432"
     volumes:
       - notes-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U notes -d notes"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-notes} -d ${POSTGRES_DB:-notes}"]
       interval: 5s
       timeout: 3s
       retries: 10
