@@ -1,6 +1,6 @@
 # Scenario B — Answers
 
-Task 21
+Task 22
 
 Question 1 - 
 
@@ -18,8 +18,16 @@ I just have copied the necessary files from the builder stage to the final stage
 - Everything else is removed from the final stage.
 - I have attached the screenshots of the image sizes in the `evidence` directory.
 
-Task 22
+Task 23
 
 Question 1 - Why after changing anything in the code, the build time is increased?
 
 Answer 1 - Docker build images in layers and each layer is cached. When we change anything in the code, the layers after the changed layer are re-built, which increases the build time. In my case i changed app/routes.php file, so after COPY app/ ./, all the layers after that are re-built, which increases the build time.
+
+
+Task 24
+
+Question 1 - Which layer is biggest? What command created it? Could it be smaller?
+
+Answer 1 - `FROM php:8.3-cli-alpine` command created the biggest layer. And as we are already using the smallest base image (alpine), it cannot be smaller.
+
