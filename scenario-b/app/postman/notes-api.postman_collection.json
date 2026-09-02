@@ -1,0 +1,551 @@
+{
+  "info": {
+    "name": "Scenario B - Multi-tenant Notes API",
+    "description": "Laravel + PostgreSQL Notes API.\n\nEvery request needs the header `X-Tenant`. It holds the tenant slug, for example `acme`.\nThe server finds the tenant by that slug and adds `where tenant_id = ?` to every query.\n\nSeeded tenants: acme (30,000 notes), globex (8,000), initech (6,000), umbrella (4,000), hooli (2,000).\n\nChange the tenant for the whole collection in the Variables tab.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api",
+      "type": "string",
+      "description": "Where the API runs. Change this if you use another port."
+    },
+    {
+      "key": "tenant",
+      "value": "acme",
+      "type": "string",
+      "description": "The tenant slug sent in the X-Tenant header."
+    },
+    {
+      "key": "other_tenant",
+      "value": "hooli",
+      "type": "string",
+      "description": "A second tenant, used to prove one tenant cannot read another tenant's note."
+    },
+    {
+      "key": "note_id",
+      "value": "1",
+      "type": "string",
+      "description": "Set by the 'Create a note' request automatically."
+    }
+  ],
+  "item": [
+    {
+      "name": "Create a note",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Save the new id so the other requests can use it.",
+              "var body = pm.response.json();",
+              "pm.collectionVariables.set('note_id', body.data.id);",
+              "",
+              "pm.test('the note belongs to the calling tenant', function () {",
+              "    pm.expect(body.data.tenant_id).to.be.a('number');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-Tenant", "value": "{{tenant}}" },
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Exam note\",\n  \"body\": \"this body mentions rocket and harbor\",\n  \"tags\": [\"work\", \"urgent\"]\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/notes",
+          "host": ["{{base_url}}"],
+          "path": ["notes"]
+        },
+        "description": "Makes one note for the tenant in the X-Tenant header.\n\nFields:\n- `title` - required, text, max 255\n- `body` - required, text\n- `tags` - optional, list of text, max 20 items\n\nReturns 201 and the new note. Returns 422 if a field is wrong."
+      },
+      "response": [
+        {
+          "name": "201 Created",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Tenant", "value": "acme" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Exam note\",\n  \"body\": \"this body mentions rocket and harbor\",\n  \"tags\": [\"work\", \"urgent\"]\n}"
+            },
+            "url": { "raw": "{{base_url}}/notes", "host": ["{{base_url}}"], "path": ["notes"] }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n    \"data\": {\n        \"id\": 50001,\n        \"tenant_id\": 1,\n        \"title\": \"Exam note\",\n        \"body\": \"this body mentions rocket and harbor\",\n        \"created_at\": \"2026-09-02T00:08:01.000000Z\",\n        \"tags\": [\n            \"work\",\n            \"urgent\"\n        ]\n    }\n}"
+        },
+        {
+          "name": "422 Missing title",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Tenant", "value": "acme" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"body\": \"no title here\"\n}" },
+            "url": { "raw": "{{base_url}}/notes", "host": ["{{base_url}}"], "path": ["notes"] }
+          },
+          "status": "Unprocessable Content",
+          "code": 422,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n    \"message\": \"The title field is required.\",\n    \"errors\": {\n        \"title\": [\n            \"The title field is required.\"\n        ]\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "List notes (paginated)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('every note belongs to one tenant only', function () {",
+              "    var body = pm.response.json();",
+              "    var ids = body.data.map(function (n) { return n.tenant_id; });",
+              "    var unique = ids.filter(function (v, i, a) { return a.indexOf(v) === i; });",
+              "    pm.expect(unique.length).to.be.below(2);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Tenant", "value": "{{tenant}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/notes?page=1&limit=20",
+          "host": ["{{base_url}}"],
+          "path": ["notes"],
+          "query": [
+            { "key": "page", "value": "1", "description": "Page number. Starts at 1." },
+            { "key": "limit", "value": "20", "description": "Rows per page. Highest allowed is 100." }
+          ]
+        },
+        "description": "Lists the notes of the calling tenant, newest first.\n\n`meta.total` is the number of notes this tenant has.\nFor tenant `acme` that is about 30,000."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [{ "key": "X-Tenant", "value": "acme" }],
+            "url": {
+              "raw": "{{base_url}}/notes?page=1&limit=2",
+              "host": ["{{base_url}}"],
+              "path": ["notes"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "2" }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n    \"data\": [\n        {\n            \"id\": 50001,\n            \"tenant_id\": 1,\n            \"title\": \"Exam note\",\n            \"body\": \"this body mentions rocket and harbor\",\n            \"created_at\": \"2026-09-02 00:08:01\"\n        },\n        {\n            \"id\": 30000,\n            \"tenant_id\": 1,\n            \"title\": \"Ocean sandal lantern\",\n            \"body\": \"cellar letter vision eagle corner system salmon diesel zebra copper marble ground crystal watch dinner yellow tower ground coffee valley email tissue gather printer pepper nectar vision needle driver diesel watch meteor earth steady eagle corner system violet fabric market dagger travel wheel rubber tomato.\",\n            \"created_at\": \"2025-10-11 03:21:17\"\n        }\n    ],\n    \"meta\": {\n        \"page\": 1,\n        \"limit\": 2,\n        \"total\": 30001,\n        \"pages\": 15001\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get one note",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('the note has a tags list', function () {",
+              "    pm.expect(pm.response.json().data.tags).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Tenant", "value": "{{tenant}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/notes/{{note_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["notes", "{{note_id}}"]
+        },
+        "description": "Reads one note and its tags.\n\n`note_id` is set for you when you run 'Create a note'.\n\nIf the note belongs to another tenant, the answer is 404. It looks like the note does not exist."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [{ "key": "X-Tenant", "value": "acme" }],
+            "url": { "raw": "{{base_url}}/notes/50001", "host": ["{{base_url}}"], "path": ["notes", "50001"] }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n    \"data\": {\n        \"id\": 50001,\n        \"tenant_id\": 1,\n        \"title\": \"Exam note\",\n        \"body\": \"this body mentions rocket and harbor\",\n        \"created_at\": \"2026-09-02 00:08:01\",\n        \"tags\": [\n            \"work\",\n            \"urgent\"\n        ]\n    }\n}"
+        },
+        {
+          "name": "404 Not found",
+          "originalRequest": {
+            "method": "GET",
+            "header": [{ "key": "X-Tenant", "value": "acme" }],
+            "url": { "raw": "{{base_url}}/notes/999999999", "host": ["{{base_url}}"], "path": ["notes", "999999999"] }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n    \"message\": \"Note not found.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Search note bodies",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('every hit really contains the word', function () {",
+              "    var body = pm.response.json();",
+              "    var word = body.meta.q.toLowerCase();",
+              "    body.data.forEach(function (n) {",
+              "        pm.expect(n.body.toLowerCase()).to.include(word);",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Tenant", "value": "{{tenant}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/search?q=rocket&page=1&limit=20",
+          "host": ["{{base_url}}"],
+          "path": ["search"],
+          "query": [
+            { "key": "q", "value": "rocket", "description": "The word to look for inside the note body. Required." },
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "20" }
+          ]
+        },
+        "description": "Looks for a word inside the note body, for this tenant only.\n\nThe query is `body ILIKE '%word%'`. No index can help that, so it reads the whole table. On 30,000 notes it is slow. That is on purpose.\n\nWords you can try: rocket, harbor, winter, zebra, quartz."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [{ "key": "X-Tenant", "value": "acme" }],
+            "url": {
+              "raw": "{{base_url}}/search?q=rocket&limit=1",
+              "host": ["{{base_url}}"],
+              "path": ["search"],
+              "query": [
+                { "key": "q", "value": "rocket" },
+                { "key": "limit", "value": "1" }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n    \"data\": [\n        {\n            \"id\": 50001,\n            \"tenant_id\": 1,\n            \"title\": \"Exam note\",\n            \"body\": \"this body mentions rocket and harbor\",\n            \"created_at\": \"2026-09-02 00:08:01\"\n        }\n    ],\n    \"meta\": {\n        \"page\": 1,\n        \"limit\": 1,\n        \"total\": 4771,\n        \"pages\": 4771,\n        \"q\": \"rocket\"\n    }\n}"
+        },
+        {
+          "name": "422 Missing q",
+          "originalRequest": {
+            "method": "GET",
+            "header": [{ "key": "X-Tenant", "value": "acme" }],
+            "url": { "raw": "{{base_url}}/search", "host": ["{{base_url}}"], "path": ["search"] }
+          },
+          "status": "Unprocessable Content",
+          "code": 422,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n    \"message\": \"The q field is required.\",\n    \"errors\": {\n        \"q\": [\n            \"The q field is required.\"\n        ]\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Stats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('the answer is about the calling tenant', function () {",
+              "    var body = pm.response.json();",
+              "    pm.expect(body.data.tenant_slug).to.eql(pm.collectionVariables.get('tenant'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-Tenant", "value": "{{tenant}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/stats",
+          "host": ["{{base_url}}"],
+          "path": ["stats"]
+        },
+        "description": "Counts for the calling tenant. The query joins all three tables: tenants, notes, tags.\n\nIt returns only the calling tenant, not all five. Showing other tenants' counts would break tenant isolation.\n\nChange the `tenant` variable to see another tenant:\n\n| tenant | notes | tags |\n|---|---|---|\n| acme | 30,000 | about 89,500 |\n| globex | 8,000 | about 24,200 |\n| initech | 6,000 | about 18,200 |\n| umbrella | 4,000 | about 12,200 |\n| hooli | 2,000 | about 5,900 |"
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [{ "key": "X-Tenant", "value": "acme" }],
+            "url": { "raw": "{{base_url}}/stats", "host": ["{{base_url}}"], "path": ["stats"] }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n    \"data\": {\n        \"tenant_id\": 1,\n        \"tenant_slug\": \"acme\",\n        \"notes_count\": 30001,\n        \"tags_count\": 89511\n    }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Tenant checks",
+      "description": "These four requests prove that one tenant cannot see another tenant's data.",
+      "item": [
+        {
+          "name": "Another tenant cannot read the note (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Tenant", "value": "{{other_tenant}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notes/{{note_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["notes", "{{note_id}}"]
+            },
+            "description": "Same note id, but a different tenant in the header.\n\nRun 'Create a note' first. The note is made for `acme`. This request asks for it as `hooli`. The answer must be 404."
+          },
+          "response": [
+            {
+              "name": "404 Not found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "X-Tenant", "value": "hooli" }],
+                "url": { "raw": "{{base_url}}/notes/50001", "host": ["{{base_url}}"], "path": ["notes", "50001"] }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n    \"message\": \"Note not found.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "No X-Tenant header (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/notes",
+              "host": ["{{base_url}}"],
+              "path": ["notes"]
+            },
+            "description": "No tenant header at all. The API refuses the call."
+          },
+          "response": [
+            {
+              "name": "400 Bad request",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{base_url}}/notes", "host": ["{{base_url}}"], "path": ["notes"] }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n    \"message\": \"The X-Tenant header is required.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Unknown tenant slug (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Tenant", "value": "nosuch" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notes",
+              "host": ["{{base_url}}"],
+              "path": ["notes"]
+            },
+            "description": "A tenant slug that is not in the tenants table."
+          },
+          "response": [
+            {
+              "name": "404 Unknown tenant",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "X-Tenant", "value": "nosuch" }],
+                "url": { "raw": "{{base_url}}/notes", "host": ["{{base_url}}"], "path": ["notes"] }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n    \"message\": \"Unknown tenant [nosuch].\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Stats for a second tenant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('counts are smaller than acme', function () {",
+                  "    pm.expect(pm.response.json().data.notes_count).to.be.below(30001);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Tenant", "value": "{{other_tenant}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/stats",
+              "host": ["{{base_url}}"],
+              "path": ["stats"]
+            },
+            "description": "Same endpoint, different tenant. The numbers must be different."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "X-Tenant", "value": "hooli" }],
+                "url": { "raw": "{{base_url}}/stats", "host": ["{{base_url}}"], "path": ["stats"] }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n    \"data\": {\n        \"tenant_id\": 5,\n        \"tenant_slug\": \"hooli\",\n        \"notes_count\": 2000,\n        \"tags_count\": 5931\n    }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
