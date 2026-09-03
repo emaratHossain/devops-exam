@@ -31,3 +31,13 @@ Question 1 - Which layer is biggest? What command created it? Could it be smalle
 
 Answer 1 - `FROM php:8.3-cli-alpine` command created the biggest layer. And as we are already using the smallest base image (alpine), it cannot be smaller.
 
+# Scenario B 2 — Answers
+
+Task 27
+
+Question 1 - Run docker compose down -v, then up -d. Show the notes are gone and explain in ANSWERS.md what the v flag did.
+
+Answer 1 - The `docker compose down -v` command removes the containers and volumes. The `v` flag removes the volumes. In my case "notes-db-data" volume contains the data of the postgres database, so when we run `docker compose down -v`, the notes are gone because the volume is removed.
+
+
+
