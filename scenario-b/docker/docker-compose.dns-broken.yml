@@ -1,0 +1,48 @@
+# BROKEN ON PURPOSE.
+# The app and the database sit on two different networks.
+# Docker DNS only resolves a service name for containers on the SAME network.
+# So "postgres" does not resolve, but the database IP still works.
+#
+# Run it:   docker compose -f docker-compose.dns-broken.yml up -d --build
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: notes-api:latest
+    container_name: notes-api
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY}
+      APP_URL: ${APP_URL:-http://localhost:5151}
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres          # <-- this name cannot be resolved from this network
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-notes}
+      DB_USERNAME: ${POSTGRES_USER:-notes}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-notes}
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      QUEUE_CONNECTION: sync
+    ports:
+      - "5151:8080"
+    networks:
+      - frontend
+
+  postgres:
+    image: postgres:16
+    container_name: notes-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-notes}
+      POSTGRES_USER: ${POSTGRES_USER:-notes}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-notes}
+    expose:
+      - "5432"
+    networks:
+      - backend                  # <-- different network than the app
+
+networks:
+  frontend:
+  backend:
