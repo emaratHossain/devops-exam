@@ -1,0 +1,27 @@
+scenario-b/docker/docker-compose.depends-only.yml
+  s_6622be8dd7839c::t_86c07d8b814e3c 1-47
+scenario-b/docker/docker-compose.yml
+  h_2d5a554200463e 45-48
+  h_2d5a554200463e 49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "6fe898b73b33ec0c2d6130786a8e60a0edea7970",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_6622be8dd7839c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c156b991-ea50-4cb6-ab2c-22293b7867e2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
