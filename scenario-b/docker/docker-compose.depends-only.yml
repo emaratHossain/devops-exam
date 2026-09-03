@@ -1,0 +1,47 @@
+# PROOF FILE: depends_on alone is NOT enough.
+# The app runs migrations at startup, so it must reach Postgres immediately.
+# restart is "no" so the crash stays visible instead of being retried away.
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: notes-api:latest
+    container_name: notes-api
+    restart: "no"
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "true"
+      APP_KEY: ${APP_KEY}
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-notes}
+      DB_USERNAME: ${POSTGRES_USER:-notes}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-notes}
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      QUEUE_CONNECTION: sync
+    command: sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8080"
+    ports:
+      - "5151:8080"
+    # ONLY depends_on. No condition. This is the thing we are proving is not enough.
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    container_name: notes-db
+    restart: "no"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-notes}
+      POSTGRES_USER: ${POSTGRES_USER:-notes}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-notes}
+    expose:
+      - "5432"
+    volumes:
+      - notes-db-data:/var/lib/postgresql/data
+
+volumes:
+  notes-db-data:
