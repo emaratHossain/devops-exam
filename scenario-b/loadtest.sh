@@ -17,12 +17,13 @@ BURST_LEN="${BURST_LEN:-30}"    # how long the burst lasts
 BURST_SIZE="${BURST_SIZE:-10}"  # requests fired at once during the burst
 HEAVY_LIMIT="${HEAVY_LIMIT:-1000}"  # how many notes the slow tenant asks for
 ROUND_SLEEP="${ROUND_SLEEP:-0.2}"   # pause between normal rounds. Bigger = less load.
-BURST_SLEEP="${BURST_SLEEP:-0.15}"  # pause between burst rounds. Bigger = smaller spike.
+BURST_SLEEP="${BURST_SLEEP:-0.4}"  # pause between burst rounds. Bigger = smaller spike.
 
 RESULTS="loadtest-results.csv"
 SUMMARY="loadtest-summary.txt"
 
-TENANTS=(acme globex initech umbrella hooli)
+TENANTS=(acme globex initech umbrella)  # normal tenants
+SLOW_TENANT="hooli"                     # only gets the heavy requests
 # Real words from the seeder, so search actually finds notes.
 WORDS=(alpha anchor backup cloud engine harbor market rocket signal winter)
 
@@ -35,7 +36,7 @@ echo "round sleep: ${ROUND_SLEEP}s   burst size: ${BURST_SIZE}   heavy limit: ${
 # hit <tenant> <route name> <path>
 # The route name is short and fixed, so the summary can group by it.
 hit() {
-  curl -s -o /dev/null --max-time 30 \
+  curl -s -o /dev/null --max-time 15 \
     -H "X-Tenant:$1" \
     -w "%{http_code},%{time_total},$1,$2\n" \
     "$BASE$3" >> "$RESULTS"
@@ -46,7 +47,7 @@ burst() {
   BEND=$((SECONDS+BURST_LEN))
   while [ $SECONDS -lt $BEND ]; do
     for i in $(seq 1 $BURST_SIZE); do
-      B=${TENANTS[$RANDOM % 5]}
+      B=${TENANTS[$RANDOM % 4]}
       hit "$B" "/api/notes" "/api/notes?limit=20" &
     done
     sleep $BURST_SLEEP
@@ -71,7 +72,7 @@ while [ $SECONDS -lt $END ]; do
     BURST_STARTED=1
   fi
 
-  T=${TENANTS[$RANDOM % 5]}
+  T=${TENANTS[$RANDOM % 4]}
   W=${WORDS[$RANDOM % 10]}
   ID=$((RANDOM % 2000 + 1))
 
@@ -85,7 +86,7 @@ while [ $SECONDS -lt $END ]; do
   # in one request. That is the N+1 problem, and it makes hooli the slow tenant.
   N=$((N+1))
   if [ $((N % 10)) -eq 0 ]; then
-    hit hooli "/api/notes" "/api/notes?limit=$HEAVY_LIMIT" &
+    hit "$SLOW_TENANT" "/api/notes" "/api/notes?limit=$HEAVY_LIMIT" &
   fi
 
   sleep $ROUND_SLEEP
@@ -114,7 +115,7 @@ stat_rows() {
   echo "LOAD TEST SUMMARY"
   echo "target     : $BASE"
   echo "duration   : ${DURATION}s, with a ${BURST_LEN}s burst starting at +${BURST_AT}s"
-  echo "slow tenant: hooli, /api/notes?limit=$HEAVY_LIMIT every 10th round"
+  echo "slow tenant: $SLOW_TENANT, /api/notes?limit=$HEAVY_LIMIT every 10th round"
   echo "total reqs : $(wc -l < "$RESULTS" | tr -d ' ')"
   echo
   echo "--- HTTP status codes (000 means no answer / timed out) ---"
