@@ -3,13 +3,20 @@
 #
 # Normal load for 5 minutes.
 # A 30 second burst in the middle.
-# One tenant (hooli) gets very heavy requests, so it looks slow.
+# One tenant (hooli) gets heavy requests, so it looks slow.
 # Every request is saved to a CSV file, then a summary is printed.
 #
 # Run it like this:   ./loadtest.sh
+# Short test run:     DURATION=60 BURST_AT=20 BURST_LEN=10 ./loadtest.sh
 # Do NOT use:         source loadtest.sh
 
-BASE="http://localhost:5151"
+BASE="${BASE:-http://localhost:5151}"
+DURATION="${DURATION:-300}"     # total run time in seconds
+BURST_AT="${BURST_AT:-150}"     # burst starts this many seconds in
+BURST_LEN="${BURST_LEN:-30}"    # how long the burst lasts
+BURST_SIZE="${BURST_SIZE:-10}"  # requests fired at once during the burst
+HEAVY_LIMIT="${HEAVY_LIMIT:-1000}"  # how many notes the slow tenant asks for
+
 RESULTS="loadtest-results.csv"
 SUMMARY="loadtest-summary.txt"
 
@@ -18,7 +25,7 @@ TENANTS=(acme globex initech umbrella hooli)
 WORDS=(alpha anchor backup cloud engine harbor market rocket signal winter)
 
 echo "$EXAM_TOKEN | $(date)"
-echo "target: $BASE"
+echo "target: $BASE   duration: ${DURATION}s   burst: ${BURST_LEN}s at +${BURST_AT}s"
 
 : > "$RESULTS"
 
@@ -31,15 +38,15 @@ hit() {
     "$BASE$3" >> "$RESULTS"
 }
 
-# The 30 second spike. Many requests at the same time.
+# The spike. More requests at once, for a short time.
 burst() {
-  BEND=$((SECONDS+30))
+  BEND=$((SECONDS+BURST_LEN))
   while [ $SECONDS -lt $BEND ]; do
-    for i in $(seq 1 20); do
+    for i in $(seq 1 $BURST_SIZE); do
       B=${TENANTS[$RANDOM % 5]}
       hit "$B" "/api/notes" "/api/notes?limit=20" &
     done
-    sleep 0.1
+    sleep 0.15
   done
   wait
 }
@@ -47,15 +54,15 @@ burst() {
 # ---------- normal load ----------
 
 START=$SECONDS
-END=$((SECONDS+300))     # 5 minutes
+END=$((SECONDS+DURATION))
 BURST_STARTED=0
 N=0
 
 while [ $SECONDS -lt $END ]; do
   ELAPSED=$((SECONDS-START))
 
-  # Start the burst once, in the middle of the run (at 2:30).
-  if [ $BURST_STARTED -eq 0 ] && [ $ELAPSED -ge 150 ]; then
+  # Start the burst once, in the middle of the run.
+  if [ $BURST_STARTED -eq 0 ] && [ $ELAPSED -ge $BURST_AT ]; then
     echo ">> burst START at +${ELAPSED}s"
     ( burst; echo ">> burst END" ) &
     BURST_STARTED=1
@@ -70,12 +77,12 @@ while [ $SECONDS -lt $END ]; do
   hit "$T" "/api/stats"     "/api/stats" &
   hit "$T" "/api/notes/:id" "/api/notes/$ID" &
 
-  # The slow tenant. Every 5th round hooli asks for 5000 notes.
-  # Each note then needs its own tags query. That is the N+1 problem.
+  # The slow tenant. Every 10th round hooli asks for 1000 notes.
+  # Each note then needs its own tags query, so that is about 1001 queries
+  # in one request. That is the N+1 problem, and it makes hooli the slow tenant.
   N=$((N+1))
-  if [ $((N % 5)) -eq 0 ]; then
-    hit hooli "/api/notes"  "/api/notes?limit=5000" &
-    hit hooli "/api/search" "/api/search?q=alpha&limit=5000" &
+  if [ $((N % 10)) -eq 0 ]; then
+    hit hooli "/api/notes" "/api/notes?limit=$HEAVY_LIMIT" &
   fi
 
   sleep 0.2
@@ -103,10 +110,11 @@ stat_rows() {
   echo "======================================================================"
   echo "LOAD TEST SUMMARY"
   echo "target     : $BASE"
-  echo "duration   : 300s, with a 30s burst starting at +150s"
+  echo "duration   : ${DURATION}s, with a ${BURST_LEN}s burst starting at +${BURST_AT}s"
+  echo "slow tenant: hooli, /api/notes?limit=$HEAVY_LIMIT every 10th round"
   echo "total reqs : $(wc -l < "$RESULTS" | tr -d ' ')"
   echo
-  echo "--- HTTP status codes ---"
+  echo "--- HTTP status codes (000 means no answer / timed out) ---"
   cut -d, -f1 "$RESULTS" | sort | uniq -c | sort -rn
   echo
   echo "--- by route ---"
