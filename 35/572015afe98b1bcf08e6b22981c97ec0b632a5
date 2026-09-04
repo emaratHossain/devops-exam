@@ -1,0 +1,26 @@
+scenario-b/loadtest.sh
+  h_2d5a554200463e 16,54,64
+  s_60f12cee4511c8::t_30635ae5242b37 2-15,17-53,55-63,65-80,83-129
+  s_60f12cee4511c8::t_4e294e90097c0f 1,81-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "35572015afe98b1bcf08e6b22981c97ec0b632a5",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_60f12cee4511c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "650dd0c8-baf3-4c42-ac54-28ec868c5e62",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
