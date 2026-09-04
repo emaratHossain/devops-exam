@@ -16,6 +16,8 @@ BURST_AT="${BURST_AT:-150}"     # burst starts this many seconds in
 BURST_LEN="${BURST_LEN:-30}"    # how long the burst lasts
 BURST_SIZE="${BURST_SIZE:-10}"  # requests fired at once during the burst
 HEAVY_LIMIT="${HEAVY_LIMIT:-1000}"  # how many notes the slow tenant asks for
+ROUND_SLEEP="${ROUND_SLEEP:-0.2}"   # pause between normal rounds. Bigger = less load.
+BURST_SLEEP="${BURST_SLEEP:-0.15}"  # pause between burst rounds. Bigger = smaller spike.
 
 RESULTS="loadtest-results.csv"
 SUMMARY="loadtest-summary.txt"
@@ -26,6 +28,7 @@ WORDS=(alpha anchor backup cloud engine harbor market rocket signal winter)
 
 echo "$EXAM_TOKEN | $(date)"
 echo "target: $BASE   duration: ${DURATION}s   burst: ${BURST_LEN}s at +${BURST_AT}s"
+echo "round sleep: ${ROUND_SLEEP}s   burst size: ${BURST_SIZE}   heavy limit: ${HEAVY_LIMIT}"
 
 : > "$RESULTS"
 
@@ -46,7 +49,7 @@ burst() {
       B=${TENANTS[$RANDOM % 5]}
       hit "$B" "/api/notes" "/api/notes?limit=20" &
     done
-    sleep 0.15
+    sleep $BURST_SLEEP
   done
   wait
 }
@@ -85,7 +88,7 @@ while [ $SECONDS -lt $END ]; do
     hit hooli "/api/notes" "/api/notes?limit=$HEAVY_LIMIT" &
   fi
 
-  sleep 0.2
+  sleep $ROUND_SLEEP
 done
 
 echo "waiting for the last requests..."

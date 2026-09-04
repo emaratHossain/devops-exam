@@ -20,6 +20,8 @@ services:
       DB_DATABASE: ${POSTGRES_DB:-notes}
       DB_USERNAME: ${POSTGRES_USER:-notes}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-notes}
+      # Number of PHP worker processes. Needs --no-reload in the Dockerfile CMD.
+      PHP_CLI_SERVER_WORKERS: 20
       CACHE_STORE: file
       SESSION_DRIVER: file
       QUEUE_CONNECTION: sync
