@@ -10,7 +10,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
     image: notes-api:latest
-    container_name: notes-api
+    container_name: badhon-notes-api
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
@@ -33,7 +33,7 @@ services:
 
   postgres:
     image: postgres:16
-    container_name: notes-db
+    container_name: badhon-notes-db
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-notes}
       POSTGRES_USER: ${POSTGRES_USER:-notes}
