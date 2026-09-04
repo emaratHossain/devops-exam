@@ -1,15 +1,16 @@
 global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+  scrape_interval: 15s # How often Prometheus collects metrics
+  evaluation_interval: 15s # How often Prometheus checks alert rules. for examle - Is CPU still above 80%? Should I trigger an alert?
 
-scrape_configs:
-  # Prometheus scrapes itself. This always works, so it proves the setup is alive.
-  - job_name: prometheus
+scrape_configs: # This is the list of things Prometheus should monitor
+  
+  # Prometheus itself. This is always UP and shows Prometheus's own metrics.
+  - job_name: prometheus # Gives this monitoring target a name: prometheus.
     static_configs:
-      - targets: ["localhost:9090"]
+      - targets: ["localhost:9090"] # Prometheus monitors itself at, for example: Prometheus → "Let me check my own metrics."
 
   # The Laravel app. This target stays DOWN until the app serves /metrics.
-  - job_name: notes-api
-    metrics_path: /metrics
+  - job_name: notes-api # Gives this monitoring target a name: notes-api.
+    metrics_path: /metrics # The path where the app exposes metrics. For example: http://app:8080/metrics
     static_configs:
-      - targets: ["app:8080"]
+      - targets: ["app:8080"] # The app is available at app:8080. we used port 8080 , because in dockerfile we exposed port 8080, and in docker-compose we mapped it to 8080

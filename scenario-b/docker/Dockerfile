@@ -1,9 +1,13 @@
 # Stage 1: Builder
 FROM php:8.3-cli-alpine AS builder
 
-# Install PHP extensions needed for Laravel
+# apcu is shared memory. The Prometheus client keeps its counters there, so the
+# numbers survive between requests.
 RUN apk add --no-cache $PHPIZE_DEPS postgresql-dev \
- && docker-php-ext-install pdo_pgsql
+ && docker-php-ext-install pdo_pgsql \
+ && yes "" | pecl install apcu \
+ && docker-php-ext-enable apcu \
+ && printf 'apc.enable_cli=1\napc.shm_size=32M\n' > /usr/local/etc/php/conf.d/zz-apcu.ini
 
 # Copy Composer from official Composer image, so that we don't need to install it in the builder, this reduces the final image size
 # COPY --from=... copies from another Docker image

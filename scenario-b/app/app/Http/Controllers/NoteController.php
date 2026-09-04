@@ -7,6 +7,7 @@ use App\Models\Tag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Support\Metrics;
 
 /**
  * Rules used everywhere in this class:
@@ -16,6 +17,10 @@ use Illuminate\Support\Facades\DB;
  */
 class NoteController extends Controller
 {
+    public function __construct(private Metrics $metrics)
+    {
+    }
+
     /** POST /api/notes */
     public function store(Request $request): JsonResponse
     {
@@ -71,6 +76,9 @@ class NoteController extends Controller
             ->offset(($page - 1) * $limit)
             ->limit($limit)
             ->get(['id', 'tenant_id', 'title', 'body', 'created_at']);
+        
+        // Prometheus: Record the number of rows returned by the query
+        $this->metrics->observeRows('select_notes', $rows->count());
 
         // Add the tags to every note.
         foreach ($rows as $note) {
@@ -78,6 +86,9 @@ class NoteController extends Controller
                 ->where('note_id', $note->id)
                 ->orderBy('id')
                 ->pluck('name');
+
+            // Prometheus: Record the number of tags per note
+            $this->metrics->observeRows('select_tags', $note->tags->count());
         }
 
         return response()->json([
@@ -101,10 +112,16 @@ class NoteController extends Controller
             return response()->json(['message' => 'Note not found.'], 404);
         }
 
+        // Prometheus: Record that we found a note
+        $this->metrics->observeRows('select_notes', 1);
+
         $note->tags = DB::table('tags')
             ->where('note_id', $note->id)
             ->orderBy('id')
             ->pluck('name');
+
+        // Prometheus: Record the number of tags for this note
+        $this->metrics->observeRows('select_tags', $note->tags->count());
 
         return response()->json(['data' => $note]);
     }
@@ -138,6 +155,9 @@ class NoteController extends Controller
             ->offset(($page - 1) * $limit)
             ->limit($limit)
             ->get(['id', 'tenant_id', 'title', 'body', 'created_at']);
+
+        // Prometheus: Record the number of rows returned by the search query
+        $this->metrics->observeRows('select_notes', $rows->count());
 
         return response()->json([
             'data' => $rows,
