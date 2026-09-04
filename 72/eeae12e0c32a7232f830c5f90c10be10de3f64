@@ -1,0 +1,25 @@
+scenario-b/docker/Dockerfile
+  s_60f12cee4511c8::t_6a76000c8bd076 57
+scenario-b/docker/prometheus/prometheus.yml
+  s_60f12cee4511c8::t_6a76000c8bd076 15-16
+scenario-b/loadtest.sh
+  s_60f12cee4511c8::t_062eca9572297e 19-20,31,52,91
+scenario-b/docker/docker-compose.yml
+  s_60f12cee4511c8::t_6a76000c8bd076 23-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "72eeae12e0c32a7232f830c5f90c10be10de3f64",
+  "prompts": {},
+  "sessions": {
+    "s_60f12cee4511c8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "650dd0c8-baf3-4c42-ac54-28ec868c5e62",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
