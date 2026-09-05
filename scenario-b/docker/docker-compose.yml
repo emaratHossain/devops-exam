@@ -28,8 +28,8 @@ services:
     ports:
       - "5151:8080"
     depends_on:
-      - postgres
-        # condition: service_healthy
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: postgres:16
