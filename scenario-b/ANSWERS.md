@@ -88,5 +88,7 @@ Question 1 - Run docker compose down -v, then up -d. Show the notes are gone and
 
 Answer 1 - The `docker compose down -v` command removes the containers and volumes. The `v` flag removes the volumes. In my case "notes-db-data" volume contains the data of the postgres database, so when we run `docker compose down -v`, the notes are gone because the volume is removed.
 
+------------------------------------------------------------------------------------------------------------------------------------------
+
 
 

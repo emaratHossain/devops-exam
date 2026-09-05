@@ -1,0 +1,31 @@
+- docker compose -f docker-compose-depends-only.yml up -d
+    - This command starts the containers defined in the docker-compose-depends-only.yml file in detached mode
+
+- doker compose down
+    - This command stops and removes the containers
+
+- doker compose down -v
+    - This command stops and removes the containers and volumes, so data stored in volumes will be lost, like postgres data stored in postgres_data volume in may case.
+
+- sudo docker compose exec -T postgres pg_dump -U notes -d notes | sudo tee notes-backup.sql > /dev/null
+    - sudo - Run the command with administrator privileges
+    - docker compose exec - Run a command inside an already-running Docker Compose container
+    - -T - Don't allocate a terminal/TTY — important when piping output
+    - postgres - The Compose service/container where PostgreSQL is running
+    - pg_dump - PostgreSQL's tool for creating a database backup
+    - -U notes - Connect as PostgreSQL user notes
+    - -d notes - Dump the database named notes
+    - | - Send pg_dump output to the next command
+    - sudo tee notes-backup.sql - Write that output into notes-backup.sql with root permission
+    - > /dev/null - Don't display the backup contents in your terminal
+
+- sudo docker compose exec -T postgres psql < backups/notes-backup.sql
+    - It is basically restoring a PostgreSQL database backup into the postgres Docker container.
+    
+    - sudo - Run the command with administrator privileges
+    - docker compose exec - Run a command inside an already-running Docker Compose container
+    - -T - Don't allocate a terminal/TTY — important when piping output
+    - postgres - The Compose service/container where PostgreSQL is running
+    - psql - PostgreSQL's command-line tool for executing SQL commands
+    - < backups/notes-backup.sql - Redirect the contents of the backup file as input to psql
+    
