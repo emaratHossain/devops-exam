@@ -1,0 +1,16 @@
+scenario-b/ANSWERS.md
+  h_2d5a554200463e 114-115,118-160
+scenario-b/concepts.txt
+  h_2d5a554200463e 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "f3d50a8830446f16f469c0261ed9340d2a3b9db9",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
