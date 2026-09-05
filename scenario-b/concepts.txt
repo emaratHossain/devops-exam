@@ -1,0 +1,7 @@
+- Prometheus = Data Collector
+    - Collects metrics from different sources
+    - Stores metrics in a time-series database
+
+- Grafana = Dashboard
+    - Visualizes metrics from different sources
+    - Provides a web interface to visualize the metrics

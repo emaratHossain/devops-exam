@@ -111,5 +111,50 @@ Answer B -
     - So we have to find the IP address of the db container and use that IP address to connect to the db service
     - we can get the IP address of the db container by running `sudo docker inspect --format='{{.NetworkSettings.Networks.network_name.IPAddress}}' notes-db`
 
+Question C - could not understand the question
+Question D - could not understand the question
 
 
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Task 29
+Question 1 - Install a Prometheus client library and expose six metrics at `GET /metrics`.
+
+Answer 1 -
+- Library: `promphp/prometheus_client_php` (added in `app/composer.json`).
+
+Question 2 - Why the `route` label is the pattern, not the real URL.
+
+Answer 2 -
+- let's say, we have 50 notes in the database, and we access each note by its ID. So the route will be `/api/notes/1`, `/api/notes/2`, ..., `/api/notes/50`. If we use the real URL as the label, we will have 50 different labels
+- So when we will try to monitor how many requests hit `/api/notes/:id`, we will have 50 different labels, which is not good for Prometheus. That's why we use the pattern `/api/notes/:id` as the label. which will help us to monitor the requests in a more efficient way.
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Task 30
+Question 1 - Wire up Prometheus. Add it to the compose file, mount the config, expose port 9090.
+
+Answer
+- I added a `prometheus` service in `scenario-b/docker/docker-compose.yml` using the image `prom/prometheus:v2.55.1`.
+- I mounted my config as read only: `./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro`. The container reads it because of the flag `--config.file=/etc/prometheus/prometheus.yml`.
+- I also added a named volume `prometheus-data:/prometheus`, so the collected metrics are not lost when the container restarts. Retention is 15 days (`--storage.tsdb.retention.time=15d`).
+- Port: I published `5252:9090`, so the UI opens at `http://169.58.246.108:5252/`.
+
+- Scenarion-B-3 | Task-30 | graph.png shows the prometheus targets
+- Scenarion-B-3 | Task-30 | graph2.png shows the prometheus graph
+
+
+Task 31
+Question 1 -
+ - Run for at least five minutes
+ - Hit all the endpoints, not just one
+ - Use at least three different tenants
+ - Include a **burst** in the middle: run your normal load, and partway through launch a second heavy load process for about 30 seconds, then stop it. You need this spike for one of the dashboard panels.
+ - Make one tenant deliberately worse — send that tenant much heavier requests, e.g. `?limit=5000`, so it shows up as the slow tenant in your dashboard
+ - Submit your load script, and the summary output from your load tool.
+
+ Answer -
+ - loadtest.sh is in - /devops-exam/scenario-b/loadtest.sh
+ - Summary output from your load tool is in - devops-exam/scenario-b/evidence/Scenarion-B-3 | Task-31 | summary.txt
+ 
+ 
