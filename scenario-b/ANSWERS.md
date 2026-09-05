@@ -90,5 +90,26 @@ Answer 1 - The `docker compose down -v` command removes the containers and volum
 
 ------------------------------------------------------------------------------------------------------------------------------------------
 
+Task 28 
+Question A - 
+    - Give the container a tiny memory limit and then make it use memory.
+    - Then in your app allocate a big array
+
+Answer A - 
+
+- `sudo docker inspect --format='{{.State.OOMKilled}}' badhon-oom-test` - It returned true
+- `sudo dmesg | tail -20` - From the last 20 lines of dmesg output, I can see that the container was killed due to out of memory error. it says -
+     `[741859.696834] oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=docker-c32e6b2f57ba5c870e04a776f066ff53600087f1cafafa246aad4f3575259f97.scope,mems_allowed=0,oom_memcg=/system.slice/docker-c32e6b2f57ba5c870e04a776f066ff53600087f1cafafa246aad4f3575259f97.scope,task_memcg=/system.slice/docker-c32e6b2f57ba5c870e04a776f066ff53600087f1cafafa246aad4f3575259f97.scope,task=python,pid=1516044,uid=0`
+- `sudo docker inspect --format='ExitCode={{.State.ExitCode}} OOMKilled={{.State.OOMKilled}}' badhon-oom-test` - It returned `ExitCode=137 OOMKilled=True`
+
+
+Question B - Explain App cannot reach the DB by service name but can by IP, when they are in different networks ?
+
+Answer B -
+    - When the app service and the db service in the same network, they can communicate with each other using the service name as the hostname. Because docker can resolve the service name to the IP address of the container.
+    - But when they are in different networks, docker cannot resolve the service name to the IP address of the container
+    - So we have to find the IP address of the db container and use that IP address to connect to the db service
+    - we can get the IP address of the db container by running `sudo docker inspect --format='{{.NetworkSettings.Networks.network_name.IPAddress}}' notes-db`
+
 
 
