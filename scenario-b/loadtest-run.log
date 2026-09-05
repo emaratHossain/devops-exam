@@ -1,0 +1,39 @@
+badhon-vmi3536696-1788109258-831ad9a8 | Sat Sep  5 15:17:16 CEST 2026
+target: http://localhost:5151   duration: 300s   burst: 30s at +150s
+round sleep: 0.2s   burst size: 10   heavy limit: 1000
+>> burst START at +150s
+>> burst END
+waiting for the last requests...
+load finished.
+badhon-vmi3536696-1788109258-831ad9a8 | Sat Sep  5 15:22:30 CEST 2026
+======================================================================
+LOAD TEST SUMMARY
+target     : http://localhost:5151
+duration   : 300s, with a 30s burst starting at +150s
+slow tenant: hooli, /api/notes?limit=1000 every 10th round
+total reqs : 5516
+
+--- HTTP status codes (000 means no answer / timed out) ---
+   5293 000
+    152 200
+     71 404
+
+--- by route ---
+/api/notes             n=1853   avg= 14.940s  p95= 15.108s  max= 15.998s
+/api/search            n=1221   avg= 14.902s  p95= 15.091s  max= 16.016s
+/api/stats             n=1221   avg= 14.919s  p95= 15.084s  max= 16.082s
+/api/notes/:id         n=1221   avg= 14.849s  p95= 15.099s  max= 16.086s
+
+--- by tenant (hooli must be the slowest) ---
+acme                   n=1249   avg= 14.923s  p95= 15.093s  max= 15.893s
+globex                 n=1424   avg= 14.932s  p95= 15.103s  max= 15.993s
+initech                n=1340   avg= 14.872s  p95= 15.093s  max= 16.086s
+umbrella               n=1381   avg= 14.905s  p95= 15.098s  max= 15.801s
+hooli                  n=122    avg= 14.846s  p95= 15.052s  max= 15.430s
+
+--- everything ---
+all requests           n=5516   avg= 14.907s  p95= 15.100s  max= 16.086s
+======================================================================
+
+raw data: loadtest-results.csv
+summary : loadtest-summary.txt
