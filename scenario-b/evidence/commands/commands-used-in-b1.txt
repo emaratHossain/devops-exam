@@ -1,0 +1,55 @@
+- docker run --rm myapp:v1 whoami
+    - docker run - This command runs a container from the image myapp:v1
+    - --rm - This flag removes the container after it exits
+    - whoami - This command prints the username of the current user
+    - Example output: emarat (In our case, for 2nd stage)
+
+- docker run --rm myapp:v1 id
+    - docker run - This command runs a container from the image myapp:v1
+    - --rm - This flag removes the container after it exits
+    - id - This command prints the user ID of the current user
+    - Example output: uid=1001(emarat) gid=1001(emarat) groups=1001(emarat) , which indicates userid, username, groupid, and groupname
+
+- docker run -d --name hc myapp:v1
+    - docker run - This command runs a container from the image myapp:v1
+    - -d - This flag runs the container in detached mode (in the background)
+    - --name hc - This flag sets the name of the container to hc
+    - myapp:v1 - This is the image name and tag
+
+- docker ps
+    - docker ps - This command lists all running containers
+    - Example output: CONTAINER ID   IMAGE        COMMAND       CREATED         STATUS         PORTS     NAMES
+                      abc123def456   myapp:v1     "php-fpm"     2 minutes ago   Up 2 minutes   9000/tcp  hc
+
+- docker inspect --format='{{json .State.Health}}' hc | jq
+    - docker inspect - This command displays detailed information about a container
+    - --format='{{json .State.Health}}' - This flag formats the output to show only the health status
+    - hc - This is the name of the container
+    - | jq - This command formats the JSON output
+    - Example output: {"Status":"healthy","FailingStreak":0,"Log":[{"Start":"2025-10-15T12:00:00Z","End":"2025-10-15T12:00:01Z","ExitCode":0,"Output":"OK"}]}
+
+- docker images notes-api
+    - This command lists all images with the name notes-api, In our case we checked sizes of different notes-api images
+
+- time docker build -t myapp:multi .
+    - time - This command measures the time taken to build the image
+    - docker build - This command builds an image from a Dockerfile
+    - -t myapp:multi - This flag tags the image with the name myapp and tag multi
+    - . - This is the path to the Dockerfile
+
+- docker history myapp:multi
+    - docker history - This command shows the history of an image
+    - myapp:multi - This is the image name and tag
+
+- docker history --no-trunc --format "{{.Size}}\t{{.CreatedBy}}" myapp:multi
+    - docker history - This command shows the history of an image
+    - --no-trunc - This flag shows the full command
+    - --format "{{.Size}}\t{{.CreatedBy}}" - This flag formats the output to show only the size and command
+    - myapp:multi - This is the image name and tag
+
+- docker run --rm notes-api:latest find / -name ".env" 2>/dev/null
+    - docker run - This command runs a container from the image notes-api:latest
+    - --rm - This flag removes the container after it exits
+    - notes-api:latest - This is the image name and tag
+    - find / -name ".env" 2>/dev/null - This command finds all files with the name .env in the root directory
+
