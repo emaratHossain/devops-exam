@@ -1,0 +1,18 @@
+scenario-b/ANSWERS.md
+  h_2d5a554200463e 69-70,74-77,79-85
+  h_2d5a554200463e 86
+scenario-b/docker/docker-compose.yml
+  h_2d5a554200463e 31
+  h_2d5a554200463e 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "5687c6e9c399af0cb3d42627d3c2b8e984b4bf81",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
