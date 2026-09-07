@@ -4,9 +4,10 @@
 # Deploy with:
 #   cd scenario-b/docker
 #   set -a; . ./.env; set +a
-#   docker stack deploy -c docker-stack.yml notes
+#   docker stack deploy -c docker-stack.yml badhon_notes
 #
-# Stack name "notes" + service key "app" = service name "notes_app".
+# Shared server, so the stack name carries a prefix.
+# Stack "badhon_notes" + service key "app" = service name "badhon_notes_app".
 
 services:
   app:
@@ -89,10 +90,6 @@ networks:
     driver: overlay
 
 volumes:
-  # Reuses the volume the compose setup already made, so your notes are still
-  # there. Check the real name on the server:
-  #   docker volume ls | grep notes-db-data
-  # If it is different, change the "name:" line below.
+  # Swarm makes this volume itself, named <stack name>_notes-db-data.
+  # It starts empty. Load the old notes back from docker/backups/notes-backup.sql.
   notes-db-data:
-    external: true
-    name: docker_notes-db-data
