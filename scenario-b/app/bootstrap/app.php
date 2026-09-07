@@ -26,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             App\Http\Middleware\TrackMetrics::class,
         ]);
+
+        // Runs on every request, so /up gets it too. Adds X-Served-By: <container id>.
+        $middleware->append(App\Http\Middleware\ServedBy::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -1,0 +1,98 @@
+# Swarm stack for Scenario B4 (scaling and rollback).
+#
+# Swarm has no "build:". The image must already be pushed to a registry.
+# Deploy with:
+#   cd scenario-b/docker
+#   set -a; . ./.env; set +a
+#   docker stack deploy -c docker-stack.yml notes
+#
+# Stack name "notes" + service key "app" = service name "notes_app".
+
+services:
+  app:
+    # Change this tag to roll forward or back. Set APP_IMAGE in .env.
+    image: ${APP_IMAGE}
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY}
+      APP_URL: ${APP_URL:-http://localhost:5151}
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-notes}
+      DB_USERNAME: ${POSTGRES_USER:-notes}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-notes}
+      PHP_CLI_SERVER_WORKERS: 20
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      QUEUE_CONNECTION: sync
+    ports:
+      # Swarm publishes this on the node and spreads requests over the replicas.
+      - "5151:8080"
+    networks:
+      - notes-net
+    # Faster than the HEALTHCHECK in the Dockerfile, so a bad deploy is caught
+    # in seconds instead of minutes.
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/up') === false ? 1 : 0);"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1        # replace one copy at a time
+        delay: 10s            # wait 10s between copies
+        order: start-first    # start the new copy before killing the old one
+        monitor: 30s          # watch a new copy for 30s before moving on
+        max_failure_ratio: 0  # any failure counts
+        failure_action: rollback
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-notes}
+      POSTGRES_USER: ${POSTGRES_USER:-notes}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-notes}
+    volumes:
+      - notes-db-data:/var/lib/postgresql/data
+    networks:
+      - notes-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-notes} -d ${POSTGRES_DB:-notes}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        # The data sits on one disk, so keep the DB on the manager node.
+        constraints:
+          - node.role == manager
+
+networks:
+  notes-net:
+    driver: overlay
+
+volumes:
+  # Reuses the volume the compose setup already made, so your notes are still
+  # there. Check the real name on the server:
+  #   docker volume ls | grep notes-db-data
+  # If it is different, change the "name:" line below.
+  notes-db-data:
+    external: true
+    name: docker_notes-db-data
