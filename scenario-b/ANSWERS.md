@@ -276,3 +276,17 @@ Answer 1 - **No. Swarm would not have noticed.**
 
 - Evidence: `Scenarion-B-3 | Task-38 | After Back on v2.png`, `Scenarion-B-3 | Task-38 | v3 failed then v2 running.png`, `Scenarion-B-3 | Task-38 | Updated Status.png`
 
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Task 39
+Question 1 - What did you observe, and how does a limit differ from a reservation?
+
+Answer 1 -
+
+- I asked for 64 GB of memory on a 7.8 GB server. The copy never started. It stayed `Pending` with the error `no suitable node (insufficient resources on 1 node)`.
+- A **reservation** is a booking. Swarm will not start a copy unless that much memory is free on the node. This is what blocked me.
+- A **limit** is a ceiling. The copy still starts, but the kernel kills it if it uses more than that while running.
+
+- My settings: `limits` 1G memory / 0.50 CPU, `reservations` 128M memory / 0.10 CPU. Command used - `sudo docker service update --reserve-memory 64G badhon_notes_app`. Put back with `--reserve-memory 128M`.
+- Evidence: `Scenarion-B-4 | Task-39 | pending.png`
