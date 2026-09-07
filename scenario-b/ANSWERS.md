@@ -134,7 +134,7 @@ Answer 2 -
 Task 30
 Question 1 - Wire up Prometheus. Add it to the compose file, mount the config, expose port 9090.
 
-Answer
+Answer 1 -
 - I added a `prometheus` service in `scenario-b/docker/docker-compose.yml` using the image `prom/prometheus:v2.55.1`.
 - I mounted my config as read only: `./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro`. The container reads it because of the flag `--config.file=/etc/prometheus/prometheus.yml`.
 - I also added a named volume `prometheus-data:/prometheus`, so the collected metrics are not lost when the container restarts. Retention is 15 days (`--storage.tsdb.retention.time=15d`).
@@ -143,6 +143,7 @@ Answer
 - Scenarion-B-3 | Task-30 | graph.png shows the prometheus targets
 - Scenarion-B-3 | Task-30 | graph2.png shows the prometheus graph
 
+------------------------------------------------------------------------------------------------------------------------------------------
 
 Task 31
 Question 1 -
@@ -153,8 +154,76 @@ Question 1 -
  - Make one tenant deliberately worse — send that tenant much heavier requests, e.g. `?limit=5000`, so it shows up as the slow tenant in your dashboard
  - Submit your load script, and the summary output from your load tool.
 
- Answer -
+ Answer 1 -
  - loadtest.sh is in - /devops-exam/scenario-b/loadtest.sh
  - Summary output from your load tool is in - devops-exam/scenario-b/evidence/Scenarion-B-3 | Task-31 | summary.txt
  
  
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Task 32
+Question A 
+- What are the top 5 slowest endpoints by p95 latency?
+- p95 means “95% of requests were faster than this.” It is more useful than an average because averages hide the slow tail.
+
+Answer A -
+- Top 5 slowest endpoints by p95 latency are:
+    1. /api/notes - max p95 score is 5sec
+    2. /api/notes/:id - max p95 score is 483ms
+    3. /api/search - max p95 score is 3.72sec
+    4. /api/stats - max p95 score is 3.04sec
+- The query I used - `topk(5, histogram_quantile(0.95, sum by (route, le) (rate(http_request_duration_seconds_bucket[5m]))))`
+
+Question B -
+- Panel B — Which endpoint consumed the most TOTAL time
+- This is a different question from Panel A and it is the most important panel in this whole exam.
+- Panel A tells you which endpoint is slowest *per request*. Panel B tells you where your server’s time is actually going.
+- An endpoint that takes 5 seconds but is called twice an hour is less important than an endpoint that takes 200ms but is called 500 times a second. 
+- state which endpoint wins each panel on your system, and explain in your own words why they are different.
+
+Answer B -
+- In panel B - /api/notes is showing at 19.22, system was working on 20 /api/notes requests
+- In panel A - /api/notes has p95 score of 5sec
+- The reason they are different is because panel B shows how much total time was spent on that endpoint, while panel A shows the latency of individual requests.
+
+- The query i used for panel B -  `topk(5, sum by (route) (rate(http_request_duration_seconds_sum[5m])))`
+
+Question C -
+- Average and p99 DB query duration by query name
+- Put both on the same panel so you can see the gap between them.
+
+Answer C -
+- Bottom (green, yellow, dark blue, orange) - average seconds per query
+- Top (red, blue, pink, purple) - p99 seconds per query
+
+- Explanation for count_notes query -
+  - Average count_notes is around 0.2–0.3 seconds. Its p99 is 1 second or worse. So the slowest 1% of these queries take at least 3–5 times longer than the normal one.
+
+- Query A - `sum by (query_name) (rate(db_query_duration_seconds_sum[5m])) / sum by (query_name) (rate(db_query_duration_seconds_count[5m]))`
+- Query B - `histogram_quantile(0.99, sum by (query_name, le) (rate(db_query_duration_seconds_bucket[5m])))`
+
+Question D -
+- The slowest single query, and how often it runs
+
+Answer D -
+- count_notes - 1 second p99, runs 0.23 times per second
+- select_tenants - 1 second p99, runs 0.59 times per second
+- The query I used - 
+    - `histogram_quantile(0.99, sum by (query_name, le) (rate(db_query_duration_seconds_bucket[5m])))`
+    - `sum by (query_name) (rate(db_query_duration_seconds_count[5m]))`
+
+Question E -
+- Which query has the N+1 problem?
+
+Answer E -
+- api/notes endpoint has the N+1 problem - 
+    - 1 query to get the 20 notes (select_notes) - total 1
+    - 1 query per note for its tags (select_tags) - total 20
+    - 1 query to find the tenant (select_tenants) - total 1
+    - 1 query to count the total for paging (count_notes) - total 1
+    - So in total there are 23 queries for 20 notes
+- The query I used - `sum by (route) (rate(db_queries_per_request_sum[5m]))/sum by (route) (rate(db_queries_per_request_count[5m]))`
+
+
+
+
