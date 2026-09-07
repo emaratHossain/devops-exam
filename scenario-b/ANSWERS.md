@@ -253,3 +253,12 @@ Answer 1 -
      10 X-Served-By: 9d513657721a
 ```
 
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Task 37
+Question 1 - Rolling update with zero downtime. Submit the status code count. Be honest about failures.
+
+Answer 1 -
+
+- Result: 1003 requests, all 200. Zero failures
+
