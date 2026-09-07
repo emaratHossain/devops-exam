@@ -1,0 +1,25 @@
+scenario-b/ANSWERS.md
+  h_2d5a554200463e 263
+  s_e77d0ad1d24691::t_d77a69783e799c 256-262,264
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "b85511753b7e698f9c32e365c98fdfd1c4bebc21",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_e77d0ad1d24691": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9f0b9d5e-5c31-458f-ae4f-0e00ab6b454d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
