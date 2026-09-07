@@ -43,7 +43,9 @@ services:
       retries: 3
       start_period: 20s
     deploy:
-      replicas: 2
+      # Keep this at 5. A "stack deploy" resets the replica count to whatever
+      # is written here, even if you scaled up with a command earlier.
+      replicas: 5
       resources:
         # limits = the ceiling. A copy may never use more than this while it
         # runs. Go over the memory limit and the kernel kills the container.
