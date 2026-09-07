@@ -227,3 +227,29 @@ Answer E -
 
 
 
+
+------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------
+
+# Scenario B 4 — Answers
+
+Task 36
+Question 1 - Scale to 5 replicas and prove all 5 are really serving traffic.
+
+Answer 1 -
+
+- The server is shared, so I used a stack name prefix. My stack is `badhon_notes`, so my service is `badhon_notes_app`.
+- Scaled with `sudo docker service scale badhon_notes_app=5`. `docker service ps badhon_notes_app` shows 5 tasks Running.
+- `docker service ps` only proves the copies started. It does not prove traffic reaches all of them. So I made the app name itself.
+- I added `App\Http\Middleware\ServedBy` and registered it with `$middleware->append(...)` in `app/bootstrap/app.php`. It puts `X-Served-By: <container id>` on every response, including `/up`.
+- A container's hostname is its container ID, so every copy sends a different value.
+- Then I sent 50 requests and counted the IDs. Result: 5 different IDs, 10 requests each. The load is spread evenly.
+
+```
+     10 X-Served-By: 08b24dde2f50
+     10 X-Served-By: 09978ac1de5f
+     10 X-Served-By: 79f71bfc8707
+     10 X-Served-By: 7f6936730034
+     10 X-Served-By: 9d513657721a
+```
+
