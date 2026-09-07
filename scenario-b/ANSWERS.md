@@ -262,3 +262,17 @@ Answer 1 -
 
 - Result: 1003 requests, all 200. Zero failures
 
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Task 38
+Question 1 - What would have happened if my image had no healthcheck? Would Swarm have noticed?
+
+Answer 1 - **No. Swarm would not have noticed.**
+
+- With no healthcheck, Swarm asks only one question: is the process alive? My broken v3 stays alive. It just listens on the wrong port. So Swarm calls it healthy.
+- Swarm would then replace all 5 copies and say the update worked.
+- End result: the whole service is dead, and no rollback. I would have to find the problem and fix it by hand.
+- The healthcheck is what tells Swarm the difference between "the process is running" and "the app works".
+
+- Evidence: `Scenarion-B-3 | Task-38 | After Back on v2.png`, `Scenarion-B-3 | Task-38 | v3 failed then v2 running.png`, `Scenarion-B-3 | Task-38 | Updated Status.png`
+
