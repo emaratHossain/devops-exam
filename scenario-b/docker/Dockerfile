@@ -45,6 +45,12 @@ WORKDIR /var/www/html
 # Copy application code from builder with proper ownership to the newly created user emarat
 COPY --from=builder --chown=emarat:emarat /build/ ./
 
+# Version string baked into the image. Build with:
+#   docker build --build-arg APP_VERSION=v2 ...
+# Placed here on purpose: it only rebuilds the last tiny layers, not the whole image.
+ARG APP_VERSION=dev
+ENV APP_VERSION=${APP_VERSION}
+
 # Switch to non-root user
 USER emarat
 EXPOSE 8080

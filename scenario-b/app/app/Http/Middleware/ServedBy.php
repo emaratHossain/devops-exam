@@ -16,6 +16,10 @@ class ServedBy
         // different one. This shows which copy answered the request.
         $response->headers->set('X-Served-By', gethostname());
 
+        // Baked into the image at build time:
+        //   docker build --build-arg APP_VERSION=v2 ...
+        $response->headers->set('X-App-Version', getenv('APP_VERSION') ?: 'unknown');
+
         return $response;
     }
 }
