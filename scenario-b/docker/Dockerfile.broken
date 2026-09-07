@@ -1,0 +1,17 @@
+# Deliberately broken image for Scenario B4, Task 38.
+#
+# The bug: the app listens on port 9090, but the service and the healthcheck
+# expect 8080. So nothing can reach it.
+#
+# This is the interesting kind of broken. The PHP process starts and stays
+# alive, so Docker sees "running". Only the healthcheck can tell that the app
+# is useless. Without a healthcheck, Swarm would happily roll this out to all
+# 5 copies and the whole service would be down.
+#
+# Build:
+#   docker build -f docker/Dockerfile.broken -t badhon424/notes-api:v3 docker/
+FROM badhon424/notes-api:v2
+
+ENV APP_VERSION=v3
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=9090", "--no-reload"]
