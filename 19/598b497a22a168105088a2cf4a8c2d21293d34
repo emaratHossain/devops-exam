@@ -1,0 +1,27 @@
+scenario-a/A3/configs/checks.conf
+  h_2d5a554200463e 2-3
+scenario-a/A3/ANSWERS.md
+  h_2d5a554200463e 26-55
+  s_5ec7405536ee08::t_8fbde661f7c31b 19,21-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "19598b497a22a168105088a2cf4a8c2d21293d34",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_5ec7405536ee08": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f1ecb145-9077-4b90-9a85-e6e0e38c5057",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
