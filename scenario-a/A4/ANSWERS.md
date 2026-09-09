@@ -25,3 +25,20 @@ Task 13 (4 marks) — Trigger the restart limit
 
     - how you would notice this in production if you were not watching the terminal?
     - I would monitor the service status and systemd journal using a monitoring system or alerting tool like (Grafana, Prometheus). A high restart count or repeated service failures would trigger an alert so I could investigate the application logs.
+
+
+Task 14 (4 marks) — journalctl queries
+    - Last 10 minutes: `sudo journalctl -u badapp.service --since "10 minutes ago"`
+    - Errors and worse: `sudo journalctl -u badapp.service -p err..emerg`
+    - Current boot: `sudo journalctl -u badapp.service -b`
+    - Previous boot: `sudo journalctl -u badapp.service -b -1`
+    - JSON: `sudo journalctl -u badapp.service -o json -n 20`
+    - Follow live: `sudo journalctl -u badapp.service -f`
+
+Task 15 (4 marks) - The app that is alive but dead
+    - Explain in one paragraph why Restart=on-failure did not catch /hang issue .
+    - `Restart=on-failure` did not catch the `/hang` problem because the application process was still running and had not crashed or exited with an error. Systemd therefore considered the service healthy, even though the app was no longer responding to HTTP requests. The watchdog detects this by checking `/healthz` and restarting the service when the check fails.
+
+    - badapp-watchdog.sh - Created and configured to check `/healthz` and restart the service if it fails. 
+    - badapp-watchdog.service - Created and configured to run the watchdog script. 
+    - badapp-watchdog.timer - Created and configured to run the watchdog service every 30 seconds.

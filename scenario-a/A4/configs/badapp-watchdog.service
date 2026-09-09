@@ -1,0 +1,6 @@
+[Unit]
+Description=Watchdog for badapp
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/badapp-watchdog.sh
