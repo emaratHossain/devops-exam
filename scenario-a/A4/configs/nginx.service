@@ -1,0 +1,18 @@
+[Unit]
+Description=Badhons Python Web App
+Wants=network-online.target
+After=network-online.target postgresql.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+User=badappuser
+WorkingDirectory=/var/opt/badhon/python-app
+Environment=PORT=5073
+ExecStart=/usr/bin/python3 /var/opt/badhon/python-app/app.py
+
+Restart=on-failure
+SyslogIdentifier=badapp
+
+[Install]
+WantedBy=multi-user.target
