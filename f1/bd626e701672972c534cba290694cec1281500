@@ -1,0 +1,18 @@
+scenario-a/A4/ANSWERS.md
+  h_2d5a554200463e 1-19
+scenario-a/A4/configs/nginx.service
+  h_2d5a554200463e 1-18
+scenario-a/A4/configs/python-app.py
+  h_2d5a554200463e 1-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "f1bd626e701672972c534cba290694cec1281500",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
