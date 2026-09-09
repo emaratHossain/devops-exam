@@ -1,0 +1,21 @@
+scenario-a/A4/configs/badapp-watchdog.sh
+  h_2d5a554200463e 1-3
+scenario-a/A4/configs/badapp-watchdog.service
+  h_2d5a554200463e 1-6
+scenario-a/A4/configs/badapp-watchdog.timer
+  h_2d5a554200463e 1-10
+scenario-a/A4/ANSWERS.md
+  h_2d5a554200463e 28-44
+  h_2d5a554200463e 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "3692412d7fa8923033ec3bf3eb380c2701989778",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
