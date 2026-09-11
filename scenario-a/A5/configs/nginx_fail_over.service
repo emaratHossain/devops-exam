@@ -1,0 +1,20 @@
+upstream emaapp_backends {
+    least_conn;
+
+    server 127.0.0.1:5075 max_fails=1 fail_timeout=30s;
+    server 127.0.0.1:5076 max_fails=1 fail_timeout=30s;
+}
+
+server {
+    listen 80;
+    server_name _;
+
+    location / {
+        proxy_pass http://emaapp_backends;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
