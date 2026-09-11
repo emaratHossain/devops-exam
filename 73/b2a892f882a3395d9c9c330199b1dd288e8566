@@ -1,0 +1,39 @@
+scenario-b/ANSWERS.md
+  s_211942bca4483b::t_9c01eb9ac58fd2 293-317
+.github/workflows/pr.yml
+  s_211942bca4483b::t_e656a303a3d0d4 1,3-18,25,30-38,40-41,43,46-49,52-57,60-62,65-68,71-82,87-88,91-93,97-109,112-121,123-140,143-144,147-148,151-153,155,157,159
+  s_4c9a2eeaab38a3::t_c5e8bf1ef41800 2,19-24,26-29,39,42,44-45,50-51,58-59,63-64,69-70,83-86,89-90,94-96,110-111,122,141-142,145-146,149-150,154,156,158
+scenario-b/app/tests/Feature/HealthzTest.php
+  s_211942bca4483b::t_e234e54215b43d 1-48
+scenario-b/app/bootstrap/app.php
+  s_211942bca4483b::t_ffc2b8ba776336 18-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "73b2a892f882a3395d9c9c330199b1dd288e8566",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_211942bca4483b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3bf62cef-a7e9-4ce4-8f0b-3ab2efd55227",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    },
+    "s_4c9a2eeaab38a3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "471745b8-e7f8-4424-b26b-b2d5d32a93d0",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
