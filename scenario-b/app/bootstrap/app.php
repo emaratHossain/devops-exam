@@ -15,6 +15,16 @@ return Application::configure(basePath: dirname(__DIR__))
         // and it gets no session middleware.
         then: function (): void {
             Route::get('/metrics', App\Http\Controllers\MetricsController::class);
+
+            // Liveness probe for the CI pipeline and for any load balancer.
+            // Registered here on purpose: it gets no session and no tenant
+            // middleware, and it touches no database. So it answers 200 as
+            // long as PHP itself is up. That is exactly what "is the
+            // container alive?" means.
+            Route::get('/healthz', fn () => response()->json([
+                'status' => 'ok',
+                'version' => getenv('APP_VERSION') ?: 'unknown',
+            ]));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
