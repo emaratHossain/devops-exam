@@ -1,0 +1,22 @@
+scenario-b/deploy/notes-deploy
+  s_211942bca4483b::t_be9ec980de0b79 1-36,47-57
+  s_211942bca4483b::t_a0659a7df2bef1 37-46
+.github/workflows/deploy.yml
+  s_211942bca4483b::t_39c4f41083c363 66-71,149-228
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c0e96a6e5fc87ac63a0b89610218d34097e16293",
+  "prompts": {},
+  "sessions": {
+    "s_211942bca4483b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3bf62cef-a7e9-4ce4-8f0b-3ab2efd55227",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
