@@ -16,11 +16,26 @@ COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
 # This sets the working directory inside the Docker image, server will have the projects in app, but docker will have the project in build directory
 WORKDIR /build
 
-# Copy the application code from the host to the build directory
+# Dependencies first, code second. This order is on purpose.
+#
+# Docker reuses a step only when nothing above it changed. composer.json and
+# composer.lock change rarely. PHP code changes on every push. If the code
+# were copied first, every push would throw away the download below and pay
+# for it again. This way the download is reused.
+COPY app/composer.json app/composer.lock ./
+
+# --no-scripts and --no-autoloader: Laravel's after-install script needs the
+# app code, which is not here yet. The autoloader is built further down,
+# once the code has arrived.
+RUN composer install --no-dev --no-interaction --no-progress --no-scripts --no-autoloader
+
+# Now the application code. This step changes on every push, but it is only
+# a file copy, so it is cheap.
 COPY app/ ./
 
-# Install dependencies and optimize autoloader
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress \
+# Build the optimized autoloader. This also runs Laravel's post-autoload-dump
+# script (package:discover), which needs the code copied above.
+RUN composer dump-autoload --no-dev --optimize --no-interaction \
  && rm -rf tests
 
 # Stage 2: Runtime

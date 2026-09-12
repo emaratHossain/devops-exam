@@ -16,6 +16,24 @@
 # Note on step 5: GitHub Actions stops a job on the first step that exits with a
 # non-zero code. So "fail the whole workflow" is the default and needs no extra
 # setting. Nothing here uses continue-on-error, so nothing can hide a failure.
+#
+# ---------------------------------------------------------------------------
+# Scenario B5 - Task 42. Caching.
+#
+# Two caches, because there are two separate downloads:
+#
+#   1. The packages used to RUN THE TESTS, on the runner itself.
+#      Cached by "Cache the composer packages" (actions/cache).
+#      Key: the hash of composer.lock.
+#
+#   2. The packages used to BUILD THE IMAGE, inside Docker.
+#      Cached by cache-from/cache-to: type=gha on the build step.
+#      This is the big one. It was 33-39 seconds with no cache.
+#
+# The Dockerfile was also reordered for this: it copies composer.json and
+# composer.lock, installs, and only then copies the code. Docker reuses a step
+# only when nothing above it changed, so putting the code copy last means a
+# normal code change no longer throws away the download.
 
 name: PR
 
@@ -91,13 +109,28 @@ jobs:
       # ------------------------------------------------------------------
       # 3. Build the Docker image
       # ------------------------------------------------------------------
+      # Task 42. Buildx is the newer Docker builder. Plain "docker build"
+      # cannot save its layers anywhere. Buildx can push them into the GitHub
+      # cache and pull them back on the next run.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build the Docker image
-        run: |
-          docker build \
-            --file "$DOCKERFILE" \
-            --build-arg "APP_VERSION=pr-${{ github.event.pull_request.number }}" \
-            --tag "$IMAGE" \
-            "$BUILD_CONTEXT"
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.BUILD_CONTEXT }}
+          file: ${{ env.DOCKERFILE }}
+          build-args: APP_VERSION=pr-${{ github.event.pull_request.number }}
+          tags: ${{ env.IMAGE }}
+          # Hand the finished image to the local Docker, so the next step can
+          # "docker run" it. Without this the image only lives inside buildx.
+          load: true
+          # type=gha means "keep the layers in the GitHub Actions cache".
+          # mode=max keeps every layer, not only the ones in the final image.
+          # The slow composer install happens in the builder stage, which is
+          # thrown away in the final image, so mode=max is what saves the time.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Show the image size
         run: docker image ls "$IMAGE"
