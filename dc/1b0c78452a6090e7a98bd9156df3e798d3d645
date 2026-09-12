@@ -1,0 +1,14 @@
+scenario-b/ANSWERS.md
+  h_2d5a554200463e 335
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "dc1b0c78452a6090e7a98bd9156df3e798d3d645",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
