@@ -324,3 +324,56 @@ Answer 1 -
 
 - Workflow run: https://github.com/emaratHossain/devops-exam/actions/runs/34673068811
 - Package page: https://github.com/emaratHossain/devops-exam/pkgs/container/devops-exam%2Fnotes-api
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Task 44
+Question 1 - Add a deploy job that connects to the VPS and updates the running service, behind an approval gate.
+
+Answer 1 -
+
+- The `deploy` job is in `.github/workflows/deploy.yml`. It runs after the build job.
+- Run: https://github.com/emaratHossain/devops-exam/actions/runs/34678079744
+
+**The gate**
+
+- The job has `environment: production`. That environment has me as a required reviewer.
+- So GitHub stops and shows "Review deployments". Nothing in the job runs until I click Approve.
+- Why: without it, a bad commit reaches real users about 40 seconds after it is written. The gate keeps the automation and keeps the final yes with a person.
+
+**No key stored in the repo**
+
+- `gh secret list` (repo level) is empty. The SSH key is an **environment** secret on `production`, so only a job that already passed approval can read it.
+- It is a new key made only for deploys. My personal key is never given to GitHub.
+- The key is locked in `~/.ssh/authorized_keys` with `command="/usr/local/bin/notes-deploy"`. It cannot open a shell. It can only run that one program.
+- That program is owned by root and lives outside the git repo, so my own account cannot change what the key runs.
+- The program accepts nothing but a short SHA tag. It checks two things: the tag has the right shape, and the image really exists in the registry.
+
+**Why deploy the SHA tag, not `latest`**
+
+- `latest` moves. `sha-c0e96a6` never does. During an outage, `latest` cannot tell you what was running yesterday. The SHA tag can.
+
+**Result on the VPS**
+
+```
+badhon-vmi3536696-1788109258-831ad9a8 | Sat Sep 12 08:34:53 CEST 2026
+
+NAME                 IMAGE                                                     CURRENT STATE
+badhon_notes_app.1   ghcr.io/emarathossain/devops-exam/notes-api:sha-c0e96a6   Running
+badhon_notes_app.2   ghcr.io/emarathossain/devops-exam/notes-api:sha-c0e96a6   Running
+badhon_notes_app.3   ghcr.io/emarathossain/devops-exam/notes-api:sha-c0e96a6   Running
+badhon_notes_app.4   ghcr.io/emarathossain/devops-exam/notes-api:sha-c0e96a6   Running
+badhon_notes_app.5   ghcr.io/emarathossain/devops-exam/notes-api:sha-c0e96a6   Running
+```
+
+- All 5 copies moved from `badhon424/notes-api:v2` to the image GitHub built and pushed.
+
+**Something I found and fixed while doing this**
+
+- The service had been stuck at 4/5 for four days. One copy was `Pending` with `no suitable node (insufficient resources on 1 node)`.
+- The cause was my Task 39 experiment. `--reserve-memory 64G` was never put back. The server has 7.76 GiB, so a copy booking 64 GiB can never start anywhere.
+- Fixed with `docker service update --reserve-memory 128M --update-order start-first badhon_notes_app`. The service then converged 5/5.
+- My Task 39 answer says I put the value back. That was wrong until today. I am saying so here instead of hiding it.
+
+- Screenshots: `Scenarion-B-5 | Task-44 | waiting for review.png`, `Scenarion-B-5 | Task-44 | approved and green.png`, `Scenarion-B-5 | Task-44 | vps new image.png` <!-- rename to your real file names -->
+
