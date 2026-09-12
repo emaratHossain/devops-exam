@@ -1,0 +1,142 @@
+# Exam token: badhon-vmi3536696-1788109258-831ad9a8
+#
+# Scenario B5 - Task 43. The main branch pipeline.
+#
+# Runs on every push to main. It builds the image once and pushes it to the
+# GitHub Container Registry (ghcr.io) under three tags.
+#
+# ---------------------------------------------------------------------------
+# No long-lived credentials. This is the hard rule of the task.
+#
+# There is NO repo secret here. GITHUB_TOKEN is not something I saved. GitHub
+# creates it when the run starts and destroys it when the run ends, so it lives
+# for a few minutes. Nothing is stored, so nothing can leak.
+#
+# The "permissions" block below cuts it down further: this run may read the
+# code and write packages, and nothing else. That is the whole list.
+#
+# A static AWS key would be the opposite: it never expires, so one leak means
+# the attacker keeps access until a human notices and revokes it.
+#
+# ---------------------------------------------------------------------------
+# Why three tags on one image:
+#
+#   v1.0.0          a name for people. Read from scenario-b/VERSION.
+#   sha-<7 chars>   the exact commit. Never reused, so it can never lie.
+#   latest          a moving pointer to the newest build.
+#
+# During an outage "latest" is useless, because nobody can say what latest was
+# yesterday. The sha tag answers that. The version tag is what people say out
+# loud. That is why both are needed.
+#
+# ---------------------------------------------------------------------------
+# Multi-arch (linux/amd64 + linux/arm64) is deliberately NOT enabled.
+# The reason is written in scenario-b/ANSWERS.md, Task 43.
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+# Nothing outside this list is allowed, even for a moment.
+permissions:
+  contents: read
+  packages: write
+
+# Two pushes to main in a row: let the first one finish. Cancelling half way
+# could leave the registry with some tags updated and some not.
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  # Context is scenario-b/ because the Dockerfile does "COPY app/ ./".
+  BUILD_CONTEXT: scenario-b
+  DOCKERFILE: scenario-b/docker/Dockerfile
+
+jobs:
+  build-and-push:
+    name: Build the image and push it to GHCR
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Work out the image name and the three tags
+        id: img
+        run: |
+          set -euo pipefail
+
+          # Registries only accept small letters. My GitHub name is
+          # "emaratHossain" with a capital H, so it must be lowered or the
+          # push fails with an invalid reference error.
+          repo=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
+          image="${REGISTRY}/${repo}/notes-api"
+
+          # The version number lives in a file, not in this workflow. To make
+          # a new release you edit that one file.
+          version="v$(tr -d ' \r\n' < "${BUILD_CONTEXT}/VERSION")"
+
+          # 7 characters is enough to name a commit and is what git itself
+          # shows in "git log --oneline".
+          short_sha="${GITHUB_SHA:0:7}"
+
+          {
+            echo "image=${image}"
+            echo "version=${version}"
+            echo "short_sha=${short_sha}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Image: ${image}"
+          echo "Tags:  ${version} | sha-${short_sha} | latest"
+
+      # The token below is the short-lived one GitHub made for this run.
+      - name: Log in to the GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # One build, three tags. The image is built once and the same bytes get
+      # all three names. Building three times would waste time and could even
+      # produce three different images.
+      - name: Build the image and push all three tags
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.BUILD_CONTEXT }}
+          file: ${{ env.DOCKERFILE }}
+          build-args: APP_VERSION=${{ steps.img.outputs.version }}
+          push: true
+          tags: |
+            ${{ steps.img.outputs.image }}:${{ steps.img.outputs.version }}
+            ${{ steps.img.outputs.image }}:sha-${{ steps.img.outputs.short_sha }}
+            ${{ steps.img.outputs.image }}:latest
+          # Same cache as the pull request pipeline. See Task 42.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Show what is now in the registry
+        run: |
+          docker buildx imagetools inspect \
+            "${{ steps.img.outputs.image }}:${{ steps.img.outputs.version }}"
+
+      - name: Write a summary on the run page
+        run: |
+          {
+            echo "### Pushed to ${REGISTRY}"
+            echo ""
+            echo "| Tag | Full name |"
+            echo "| --- | --- |"
+            echo "| version | \`${{ steps.img.outputs.image }}:${{ steps.img.outputs.version }}\` |"
+            echo "| commit | \`${{ steps.img.outputs.image }}:sha-${{ steps.img.outputs.short_sha }}\` |"
+            echo "| moving | \`${{ steps.img.outputs.image }}:latest\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
