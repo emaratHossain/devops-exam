@@ -328,7 +328,7 @@ Answer 1 -
 ------------------------------------------------------------------------------------------------------------------------------------------
 
 Task 44
-Question 1 - Add a deploy job that connects to the VPS and updates the running service, behind an approval gate.
+Question 1 -  Add a deploy job that connects to the VPS and updates the running service, behind an approval gate.
 
 Answer 1 -
 
