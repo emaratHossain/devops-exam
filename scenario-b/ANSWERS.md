@@ -334,3 +334,16 @@ Answer 1 -
 
 - Action Link: https://github.com/emaratHossain/devops-exam/actions/runs/34678079744
 
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Task 45
+
+Question 1 - What in your setup made the failed deploy safe
+
+- The deploy job runs last. Tests and build come first. If they fail, the deploy never starts.
+- The deploy failed before touching the server. The SSH connection to the dead IP timed out. No command reached the VPS, so nothing changed there.
+
+Question 1 - What `docker service rm` and recreate would have done
+
+- `rm` deletes the service first. The site is down from that second. If the recreate then fails, there is nothing left to fall back to. No old copies, no rollback. The outage lasts until a human fixes it by hand.
+
