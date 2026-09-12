@@ -311,43 +311,5 @@ Question 1 - The first pipeline run is slow because it downloads all dependencie
 
 Answer 1 -
 
-- There are **two** downloads in my pipeline, not one, so I needed two caches.
-
-| # | What downloads | Where | How I cache it |
-|---|----------------|-------|----------------|
-| 1 | Composer packages used to run the tests | On the runner | `actions/cache` on `scenario-b/app/vendor`, keyed by the hash of `composer.lock` |
-| 2 | Composer packages used to build the image | Inside Docker | `cache-from` / `cache-to: type=gha` on the build step |
-
-- **Cache number 2 is the important one.** Before it, the "Build the Docker image" step took 33 to 39 seconds on every run. Cache number 1 only saved about 4 seconds, because the test packages are small.
-
-- **I also had to reorder the Dockerfile.** Docker reuses a step only if nothing above it changed. The old file copied the code first and installed the packages after:
-
-```dockerfile
-COPY app/ ./
-RUN composer install ...
-```
-
-  Every push changes some PHP file, so the `COPY` step changed, so the install step ran again. A cache alone would have fixed nothing. The new order copies only `composer.json` and `composer.lock`, installs, then copies the code:
-
-```dockerfile
-COPY app/composer.json app/composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader
-COPY app/ ./
-RUN composer dump-autoload --no-dev --optimize
-```
-
-  `--no-scripts --no-autoloader` is needed because Laravel's after-install script (`package:discover`) reads the app code, which is not copied yet. The autoloader is built in the last step instead.
-
-- `mode=max` on `cache-to` matters here. The slow install happens in the **builder** stage, and that stage is thrown away in the final image. The default mode would not save it.
-
-**The numbers:**
-
-| Run | Duration |
-|-----|----------|
-| Cold (no cache) | <!-- TODO --> |
-| Warm (cache used) | <!-- TODO --> |
-| Improvement | <!-- TODO --> |
-
-- Screenshot: <!-- TODO: file name in the evidence/ directory -->
-
-
+- Cold run - https://github.com/emaratHossain/devops-exam/actions/runs/34670931251
+- Warm run - https://github.com/emaratHossain/devops-exam/actions/runs/34672167471
