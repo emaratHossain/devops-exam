@@ -1,0 +1,192 @@
+# Exam token: badhon-vmi3536696-1788109258-831ad9a8 | Fri Sep 11 15:47:43 CEST 2026
+#
+# Scenario B5 - Task 41. The pull request pipeline.
+#
+# Runs on every pull request. It does five things, in order:
+#   1. Check out the code.
+#   2. Run the PHPUnit tests (15 of them today).
+#   3. Build the Docker image from scenario-b/docker/Dockerfile.
+#   4. Start that image and curl /healthz against it.
+#   5. Fail the whole run if any step above fails.
+#
+# Step 4 is the important one. A Docker build can succeed while the app inside
+# is dead: wrong port, missing file, crash on boot. Only starting the image and
+# asking it a question proves it really works.
+#
+# Note on step 5: GitHub Actions stops a job on the first step that exits with a
+# non-zero code. So "fail the whole workflow" is the default and needs no extra
+# setting. Nothing here uses continue-on-error, so nothing can hide a failure.
+#
+# ---------------------------------------------------------------------------
+# Scenario B5 - Task 42. Caching.
+#
+# Two caches, because there are two separate downloads:
+#
+#   1. The packages used to RUN THE TESTS, on the runner itself.
+#      Cached by "Cache the composer packages" (actions/cache).
+#      Key: the hash of composer.lock.
+#
+#   2. The packages used to BUILD THE IMAGE, inside Docker.
+#      Cached by cache-from/cache-to: type=gha on the build step.
+#      This is the big one. It was 33-39 seconds with no cache.
+#
+# The Dockerfile was also reordered for this: it copies composer.json and
+# composer.lock, installs, and only then copies the code. Docker reuses a step
+# only when nothing above it changed, so putting the code copy last means a
+# normal code change no longer throws away the download.
+
+name: PR
+
+on:
+  pull_request:
+
+# Two pushes to the same PR: cancel the older run instead of paying for both.
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  APP_DIR: scenario-b/app
+  # Build context is scenario-b/ because the Dockerfile does "COPY app/ ./".
+  BUILD_CONTEXT: scenario-b
+  DOCKERFILE: scenario-b/docker/Dockerfile
+  IMAGE: notes-api:ci-${{ github.sha }}
+  CONTAINER: notes-api-ci
+  PORT: "8080"
+
+jobs:
+  test-build-run:
+    name: Test, build, and run the image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # ------------------------------------------------------------------
+      # 1. Check out the code
+      # ------------------------------------------------------------------
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      # ------------------------------------------------------------------
+      # 2. Run the tests
+      # ------------------------------------------------------------------
+      # Same PHP version as the Dockerfile (php:8.3-cli-alpine). If CI used a
+      # different version, a test could pass here and fail in the image.
+      - name: Install PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          # The test suite runs on sqlite in memory. See phpunit.xml.
+          extensions: pdo_sqlite, sqlite3, mbstring, bcmath
+          coverage: none
+
+      # vendor/ is not in git, so it must be installed. The cache makes the
+      # second run much faster. The key is the lock file, so a dependency
+      # change makes a new cache by itself.
+      - name: Cache the composer packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.APP_DIR }}/vendor
+          key: composer-${{ runner.os }}-php8.3-${{ hashFiles('scenario-b/app/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php8.3-
+
+      - name: Install the PHP packages
+        working-directory: ${{ env.APP_DIR }}
+        run: composer install --prefer-dist --no-interaction --no-progress --no-ansi
+
+      # Laravel will not boot without an APP_KEY. .env is not in git, so make
+      # a throwaway one here. It is only used by this run.
+      - name: Make a .env file for the test run
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run the tests
+        working-directory: ${{ env.APP_DIR }}
+        run: php artisan test
+
+      # ------------------------------------------------------------------
+      # 3. Build the Docker image
+      # ------------------------------------------------------------------
+      # Task 42. Buildx is the newer Docker builder. Plain "docker build"
+      # cannot save its layers anywhere. Buildx can push them into the GitHub
+      # cache and pull them back on the next run.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build the Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.BUILD_CONTEXT }}
+          file: ${{ env.DOCKERFILE }}
+          build-args: APP_VERSION=pr-${{ github.event.pull_request.number }}
+          tags: ${{ env.IMAGE }}
+          # Hand the finished image to the local Docker, so the next step can
+          # "docker run" it. Without this the image only lives inside buildx.
+          load: true
+          # type=gha means "keep the layers in the GitHub Actions cache".
+          # mode=max keeps every layer, not only the ones in the final image.
+          # The slow composer install happens in the builder stage, which is
+          # thrown away in the final image, so mode=max is what saves the time.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Show the image size
+        run: docker image ls "$IMAGE"
+
+      # ------------------------------------------------------------------
+      # 4. Start the image and curl /healthz against it
+      # ------------------------------------------------------------------
+      # No database here on purpose. /healthz touches no database, so this
+      # tests one thing only: does the container come up and answer?
+      - name: Start the container
+        run: |
+          docker run --detach \
+            --name "$CONTAINER" \
+            --publish "$PORT:8080" \
+            --env APP_ENV=production \
+            --env APP_DEBUG=false \
+            --env "APP_KEY=base64:$(openssl rand -base64 32)" \
+            --env LOG_CHANNEL=stderr \
+            "$IMAGE"
+
+      - name: Curl /healthz
+        run: |
+          set -euo pipefail
+          url="http://127.0.0.1:${PORT}/healthz"
+
+          # Try for up to 60 seconds. The container needs a moment to boot.
+          for attempt in $(seq 1 30); do
+            # Stop early with a clear message if the container already died.
+            if [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER")" != "true" ]; then
+              echo "The container is not running any more."
+              exit 1
+            fi
+
+            if body=$(curl --fail --silent --show-error --max-time 5 "$url"); then
+              echo "OK after ${attempt} attempt(s)."
+              echo "Response body: ${body}"
+
+              # The body must really say ok. A 200 with the wrong body is
+              # still a broken app.
+              echo "$body" | grep -q '"status":"ok"'
+              exit 0
+            fi
+
+            echo "Attempt ${attempt}: not ready yet."
+            sleep 2
+          done
+
+          echo "/healthz never answered in 60 seconds."
+          exit 1
+
+      # Runs even when the curl step fails. Without this you only see "failed"
+      # and have to guess why.
+      - name: Show the container logs
+        if: always()
+        run: docker logs "$CONTAINER" || echo "No logs. The container never started."
+
+      - name: Remove the container
+        if: always()
+        run: docker rm --force "$CONTAINER" || true
