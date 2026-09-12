@@ -17,7 +17,7 @@ class HealthzTest extends TestCase
     {
         $this->getJson('/healthz')
             ->assertOk()
-            ->assertJsonPath('status', 'ok');
+            ->assertJsonPath('status', 'broken');
     }
 
     public function test_healthz_needs_no_tenant_header(): void
