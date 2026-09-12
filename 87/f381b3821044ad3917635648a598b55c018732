@@ -1,0 +1,28 @@
+scenario-b/ANSWERS.md
+  s_211942bca4483b::t_11d13a5551280f 306-351
+.github/workflows/pr.yml
+  s_211942bca4483b::t_3a30e8ef415b9e 19-36,112-117,119-133
+scenario-b/docker/Dockerfile
+  s_211942bca4483b::t_a59b0a04006480 19-33,36-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "87f381b3821044ad3917635648a598b55c018732",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_211942bca4483b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3bf62cef-a7e9-4ce4-8f0b-3ab2efd55227",
+        "model": "claude-opus-5"
+      },
+      "human_author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
