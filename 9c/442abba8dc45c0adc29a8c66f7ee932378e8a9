@@ -1,0 +1,14 @@
+.github/workflows/deploy.yml
+  h_2d5a554200463e 175
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9c442abba8dc45c0adc29a8c66f7ee932378e8a9",
+  "prompts": {},
+  "humans": {
+    "h_2d5a554200463e": {
+      "author": "emaratHossain <167071621+emaratHossain@users.noreply.github.com>"
+    }
+  }
+}
