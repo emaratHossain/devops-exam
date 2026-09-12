@@ -300,18 +300,7 @@ Question 1 - Build a pull request pipeline that tests, builds the image, and pro
 
 Answer 1 -
 
-- The workflow is `.github/workflows/pr.yml`. It runs on every pull request. My exam token is in a comment on line 1.
+- The workflow is `.github/workflows/pr.yml`.
 - It does five things in order: check out the code, run the tests, build the image, start the image and curl `/healthz`, and fail the run if any step fails.
-- **Tests:** 15 PHPUnit tests pass. 3 of them are new and cover `/healthz` (`tests/Feature/HealthzTest.php`): it answers 200, it needs no `X-Tenant` header, and it reports the version baked into the image.
-- **The `/healthz` route is new.** It is registered in `bootstrap/app.php` inside the `then:` closure, so it gets no session and no tenant middleware, and it touches no database. That way it answers as long as PHP is up.
-- **Why step 4 matters:** a Docker build can succeed while the app inside is dead — wrong port, missing file, crash on boot. The build step alone would not catch that. Starting the container and curling it does.
-- The curl step retries for 60 seconds, then gives up. It also stops early if the container has already died. It checks the body says `"status":"ok"`, not only the 200 code.
-- **Failing the whole run** needs no setting. GitHub Actions stops a job at the first step that exits non-zero. Nothing in my file uses `continue-on-error`.
-
-**The failed run:** <!-- TODO: paste the link to the FAILED run -->
-
-- How I broke it on purpose: <!-- TODO: say which test you changed -->
-
-**The passing run:** <!-- TODO: paste the link to the PASSED run -->
-
-- Screenshots: <!-- TODO: file names in the evidence/ directory -->
+- Failed run: https://github.com/emaratHossain/devops-exam/actions/runs/34606583251
+- Passing run: https://github.com/emaratHossain/devops-exam/actions/runs/34606795647
