@@ -172,7 +172,7 @@ jobs:
       # Not secret. The IP is already printed in README.md, and the host key is
       # public by design. Keeping them in the file means one secret, not four,
       # and anyone reading this repo can check what it connects to.
-      VPS_HOST: 10.255.255.1
+      VPS_HOST: 169.58.246.108
       VPS_USER: badhon
       VPS_HOST_KEY: "169.58.246.108 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmB2FGVbKuneiUsj68IJkZHRWrnlQ+pmxzLLaBjsqZR"
 
