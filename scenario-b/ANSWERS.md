@@ -349,3 +349,4 @@ RUN composer dump-autoload --no-dev --optimize
 | Improvement | <!-- TODO --> |
 
 - Screenshot: <!-- TODO: file name in the evidence/ directory -->
+
