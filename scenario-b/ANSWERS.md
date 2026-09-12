@@ -347,3 +347,12 @@ Question 1 - What `docker service rm` and recreate would have done
 
 - `rm` deletes the service first. The site is down from that second. If the recreate then fails, there is nothing left to fall back to. No old copies, no rollback. The outage lasts until a human fixes it by hand.
 
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Task 46
+Question 1 - Add one safeguard and describe a specific incident it prevents.
+
+Answer 1 -
+
+- I use a concurrency group `deploy-main` with `cancel-in-progress: false` in `deploy.yml` (line 50), and `timeout-minutes` on every job. My exam token is at the top of both workflow files.
+- The incident it prevents: I push commit A, then commit B a minute later, and approve both. Without the group, two deploys run `docker service update` at the same time and the one that finishes last wins. GitHub would say B is live while the server actually runs A.
