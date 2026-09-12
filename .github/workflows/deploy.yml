@@ -63,6 +63,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
+    # Handed to the deploy job below.
+    outputs:
+      image: ${{ steps.img.outputs.image }}
+      version: ${{ steps.img.outputs.version }}
+      short_sha: ${{ steps.img.outputs.short_sha }}
+
     steps:
       - name: Check out the code
         uses: actions/checkout@v4
@@ -140,3 +146,83 @@ jobs:
             echo "| commit | \`${{ steps.img.outputs.image }}:sha-${{ steps.img.outputs.short_sha }}\` |"
             echo "| moving | \`${{ steps.img.outputs.image }}:latest\` |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # ---------------------------------------------------------------------------
+  # Task 44. Deploy to the VPS, behind a human approval gate.
+  #
+  # The "environment: production" line below is the gate. That environment has
+  # a required reviewer, so GitHub stops here and shows "Review pending
+  # deployments". Nothing in this job runs until a human clicks Approve.
+  #
+  # Why a gate at all: without it a bad commit reaches real users about 40
+  # seconds after it is written. The gate keeps the automation and keeps the
+  # final yes with a person.
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy to the VPS
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    environment:
+      name: production
+      url: http://169.58.246.108:5151/healthz
+
+    env:
+      # Not secret. The IP is already printed in README.md, and the host key is
+      # public by design. Keeping them in the file means one secret, not four,
+      # and anyone reading this repo can check what it connects to.
+      VPS_HOST: 169.58.246.108
+      VPS_USER: badhon
+      VPS_HOST_KEY: "169.58.246.108 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmB2FGVbKuneiUsj68IJkZHRWrnlQ+pmxzLLaBjsqZR"
+
+    steps:
+      - name: Write the SSH key and pin the host key
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          # Pinning matters. Without a known host key, ssh would accept any
+          # machine that answers on that IP. That is how a man in the middle
+          # reads your session.
+          printf '%s\n' "$VPS_HOST_KEY" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Update the Swarm service
+        run: |
+          set -euo pipefail
+
+          # The only thing sent over the wire is the tag. On the server the key
+          # is locked to /usr/local/bin/notes-deploy, which refuses anything
+          # that is not a short SHA tag. So this key cannot open a shell.
+          ssh -i ~/.ssh/deploy_key \
+              -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=yes \
+              -o ConnectTimeout=15 \
+              "${VPS_USER}@${VPS_HOST}" \
+              "sha-${{ needs.build-and-push.outputs.short_sha }}"
+
+      - name: Check the site still answers
+        run: |
+          set -euo pipefail
+          url="http://${VPS_HOST}:5151/healthz"
+
+          for attempt in $(seq 1 30); do
+            if body=$(curl --fail --silent --show-error --max-time 5 "$url"); then
+              echo "OK after ${attempt} attempt(s): ${body}"
+              exit 0
+            fi
+            echo "Attempt ${attempt}: not answering yet."
+            sleep 4
+          done
+
+          echo "The site never answered after the deploy." >&2
+          exit 1
+
+      - name: Always remove the key from the runner
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

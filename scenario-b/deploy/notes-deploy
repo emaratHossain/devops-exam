@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+#
+# Exam token: badhon-vmi3536696-1788109258-831ad9a8
+#
+# Scenario B5 - Task 44. The only thing the GitHub deploy key may run.
+#
+# Install on the VPS as root, NOT inside the git repo:
+#   sudo install -o root -g root -m 755 notes-deploy /usr/local/bin/notes-deploy
+#
+# Why root owns it: the SSH key in ~/.ssh/authorized_keys is locked to this one
+# file. If the file lived in the repo, anyone who could push could change what
+# the key runs. Owned by root and outside the repo, the badhon user cannot
+# touch it.
+#
+# The key sends nothing but a tag, for example "sha-bcdd9b5". It arrives in
+# SSH_ORIGINAL_COMMAND. Everything else is refused.
+
+set -euo pipefail
+
+EXAM_TOKEN="badhon-vmi3536696-1788109258-831ad9a8"
+SERVICE="badhon_notes_app"
+IMAGE="ghcr.io/emarathossain/devops-exam/notes-api"
+
+echo "$EXAM_TOKEN | $(date)"
+echo
+
+tag="${SSH_ORIGINAL_COMMAND:-}"
+
+# Only a short git SHA tag is allowed. Not "latest", not a shell command,
+# not a semicolon. A key that can run one fixed shape of command is not a
+# general way into this server.
+if [[ ! "$tag" =~ ^sha-[0-9a-f]{7}$ ]]; then
+  echo "Refused. Expected a tag like sha-abc1234. Got: '${tag}'" >&2
+  exit 1
+fi
+
+# Check number two: the tag must really be in the registry.
+#
+# Check one only looks at the shape of the text. "sha-0000000" has the right
+# shape but no such image exists. Without this second check, Swarm accepts the
+# order, cannot pull anything, and the live service is left half broken.
+if ! docker manifest inspect "${IMAGE}:${tag}" > /dev/null 2>&1; then
+  echo "Refused. ${IMAGE}:${tag} is not in the registry." >&2
+  exit 1
+fi
+
+echo "Service: ${SERVICE}"
+echo "New image: ${IMAGE}:${tag}"
+echo
+
+# Swarm replaces the copies one by one, using the update_config already set
+# on the service by docker-stack.yml.
+docker service update --image "${IMAGE}:${tag}" "${SERVICE}"
+
+echo
+echo "=== docker service ps ${SERVICE} ==="
+docker service ps --no-trunc --filter "desired-state=running" "${SERVICE}"
