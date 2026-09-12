@@ -313,3 +313,49 @@ Answer 1 -
 
 - Cold run - https://github.com/emaratHossain/devops-exam/actions/runs/34670931251
 - Warm run - https://github.com/emaratHossain/devops-exam/actions/runs/34672167471
+
+| | Cold | Warm | Improvement |
+|---|------|------|-------------|
+| "Build the Docker image" step | 75s | 7s | 91% faster |
+| Whole run | 1m 44s | 32s | 69% faster |
+
+- I cache two things: the composer packages on the runner (`actions/cache`), and the Docker layers (`cache-to: type=gha,mode=max`). The Docker one saves almost all the time.
+- I also had to reorder the Dockerfile. It now copies `composer.json` and `composer.lock`, installs, and copies the code last. Before, any code change threw the download away, so a cache alone would have fixed nothing.
+- The cold run is slower than my older runs. That is correct. A cold run also uploads the cache: `sending cache export 16.7s done`. Only the cold run pays that.
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+Task 43
+Question 1 - A pipeline on main that builds, tags with the git SHA and a version, and pushes to a registry with no long-lived credentials.
+
+Answer 1 -
+
+- The workflow is `.github/workflows/deploy.yml`. It runs on push to `main`. My exam token is in a comment at the top.
+- Registry: GitHub Container Registry, `ghcr.io`.
+- **I store no credentials.** My repo has zero secrets. `gh secret list` returns nothing.
+- The login uses `GITHUB_TOKEN`. I did not save it. GitHub creates it when the run starts and destroys it when the run ends. It lives a few minutes.
+- I also limit what it may do: `contents: read`, `packages: write`. Nothing else.
+- A static AWS key is the opposite. It never expires. One leak and the attacker keeps access until a human revokes it.
+
+**Tags** - one build, three names on the same image:
+
+| Tag | Example | Answers |
+|-----|---------|---------|
+| Version | `v1.0.0` | Which release is this? |
+| Git SHA | `sha-87f381b` | Exactly which code is inside? |
+| Moving | `latest` | What is newest? |
+
+- The version number lives in `scenario-b/VERSION`. To release, you edit one file.
+- I started at `v1.0.0`, not `v1.0.3`. `v1.0.3` would claim three releases came before. None did.
+- Both tags are needed. In an outage `latest` tells you nothing, because nobody knows what it pointed at yesterday. The SHA tag is never reused, so it cannot lie.
+
+**One trap:** my GitHub name `emaratHossain` has a capital H, and registries only accept small letters. The workflow lowers it first with `tr '[:upper:]' '[:lower:]'`, or the push fails.
+
+**Multi-arch: skipped.**
+
+- Why: my server is Intel, and the runner is Intel. Building ARM needs emulation, which turns a 40 second build into 5 to 10 minutes.
+- Why someone would want it: Apple Silicon Macs and AWS Graviton servers are ARM. An Intel-only image runs slowly there under emulation, or not at all.
+
+**OIDC:** not needed here. `ghcr.io` already gives a token that expires in minutes. OIDC matters when the registry belongs to someone else, like AWS ECR. That is Scenario C.
+
+- Screenshot of the Packages tab: <!-- TODO -->
